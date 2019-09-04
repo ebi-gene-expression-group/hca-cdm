@@ -1,0 +1,75 @@
+{
+  "project": {
+    "alias": {
+      "description": "unique project name (auto-generated from MAGE-TAB file name)",
+      "type": "string",
+      "import": {
+        "ae": {
+          "parent": "project",
+          "path": [
+            "alias"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
+        },
+        "hca": {
+          "parent": "project_json",
+          "path": [
+            "project_core",
+            "project_short_name"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
+        }
+      }
+    },
+    "title": {
+      "description": "(optional) submitter provided project description",
+      "type": "string",
+      "import": {
+        "ae": {
+          "parent": "project",
+          "path": [
+            "title"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
+        },
+        "hca": {
+          "parent": "project_json",
+          "path": [
+            "project_core",
+            "project_title"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
+        }
+      }
+    },
+    "description": {
+      "description": "(optional) free-text project description",
+      "type": "string",
+      "import": {
+        "ae": {
+          "parent": "project",
+          "path": [
+            "description"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
+        },
+        "hca": {
+          "parent": "project_json",
+          "path": [
+            "project_core",
+            "project_description"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
+        }
+      }
+    }
+  }
+}
+
+
