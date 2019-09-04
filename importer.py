@@ -13,6 +13,7 @@ import json
 from ingest.api.ingestapi import IngestApi
 import converter_helper_func
 from get_common_model_entity_metadata import fetch_entity_metadata_translation
+import sys
 
 
 def get_dss_generator(hca_project_uuid):
@@ -95,8 +96,8 @@ def get_entity_granularity(common_entity_type):
 
     granularity={'project': 'one_entity_per_project',
                  'study': 'one_entity_per_project',
-                 'publication': 'one_entity_per_project',
-                 'contact': 'one_entity_per_project',
+                 'publication': 'skip_nested',
+                 'contact': 'skip_nested',
                  'sample': 'one_entity_per_hca_assay',
                  'assay': 'one_entity_per_hca_assay',
                  'assay_data': 'one_entity_per_hca_assay',
@@ -141,7 +142,8 @@ if __name__ == '__main__':
                             'attribute_translation' : attribute_translation,
                             'bundle_graph' : bundle_graph,
                             'metadata_files' : metadata_files,
-                            'metadata_files_by_uuid' : metadata_files_by_uuid
+                            'metadata_files_by_uuid' : metadata_files_by_uuid,
+                            'translation_config' : translation_config
             }
 
             if entity_granularity == 'one_entity_per_project':
@@ -158,5 +160,12 @@ if __name__ == '__main__':
                     project_translated_output[common_entity_type] = {**project_translated_output.get(common_entity_type), **translated_entity_metadata}
                 else:
                     project_translated_output[common_entity_type] = translated_entity_metadata
+
             elif entity_granularity == 'unique_project_wide':
+                # check by alias first before grabbing all metadata. Skip if seen before.
                 raise Exception('Need to build support for unique_project_wide type common entities')
+
+            elif entity_granularity == 'skip_nested':
+                # nested entites are handled at the higher level when called by the config because the higher level entity needs a list of these entities
+                continue
+            sys.exit()

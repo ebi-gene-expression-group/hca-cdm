@@ -24,42 +24,127 @@ class fetch_entity_metadata_translation:
         self.bundle = translation_params.get('bundle')
         self.common_entity_type = translation_params.get('common_entity_type')
         self.attribute_translation = translation_params.get('attribute_translation')
-        self.bundle_info = translation_params.get('bundle_info')
+        self.bundle_graph = translation_params.get('bundle_graph')
         self.metadata_files = translation_params.get('metadata_files')
         self.metadata_files_by_uuid = translation_params.get('metadata_files_by_uuid')
+        self.translation_config = translation_params.get('translation_config')
+        self.bundle_uuid = self.bundle.get('metadata').get('uuid')
         print('WORKING ON ENITY TYPE: {}'.format(self.common_entity_type))
-
 
         attribute_value_dict = {}
         for common_attribute, t in self.attribute_translation.items():
             print('WORKING ON ATTRIBUTE: {}'.format(common_attribute))
 
-            # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
-            self.import_path = t.get('import').get('hca').get('path')
-            assert self.import_path, 'Missing import_path in config for attribute {}'.format(self.common_entity_type + '.' + common_attribute)
-            # CONFIG REQUIRED used by converter to do all translations
-            self.import_method = t.get('import').get('hca').get('method')
-            assert self.import_path, 'Missing special_import_method in config for attribute {}'.format(self.common_entity_type + '.' + common_attribute)
-            # CONFIG OPTIONAL used to do value translation
-            self.import_translation = t.get('import').get('hca').get('translation', None)
-
-            # get attribute value
-            attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
+            attribute_value = self.get_attribute_value(common_attribute, t)
             attribute_value_dict[common_attribute] = attribute_value
+            print('{} : {}'.format(common_attribute, attribute_value))
 
         self.translated_entity_metadata = {self.common_entity_type:{attribute_value_dict.get('alias'):attribute_value_dict}} # alias is required
 
+    # main get method
+    def get_attribute_value(self, common_attribute, t):
+        if t.get('import', None).get('hca', None) == None: # if 'hca' is missing in config, return None (e.g. hca doesn't have fax attribute)
+            return
+
+        # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
+        self.import_path = t.get('import').get('hca').get('path')
+        assert self.import_path, 'Missing import_path in config for attribute {}'.format(
+            self.common_entity_type + '.' + common_attribute)
+        # CONFIG REQUIRED used by converter to do all translations
+        self.import_method = t.get('import').get('hca').get('method')
+        assert self.import_path, 'Missing special_import_method in config for attribute {}'.format(
+            self.common_entity_type + '.' + common_attribute)
+        # CONFIG OPTIONAL used to do value translation
+        self.import_translation = t.get('import').get('hca').get('translation', None)
+
+        # get attribute value
+        attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
+        return attribute_value
+
+
+    # General Methods
+    def import_string(self):
+        # follow path and return value
+        files = self.metadata_files.get(self.import_path[0])
+        assert len(files) == 1, 'This method expects 1 file per bundle. Detected mutiple {} entities in bundle {}'.format(self.common_entity_type, self.bundle_uuid)
+        value = files[0]
+        for level in self.import_path[1:]:
+            value = value.get(level)
+        return value
+
+    def import_string_from_selected_entity(self):
+        value = self.selected_entity
+        for level in self.import_path:
+            value = value.get(level, None)
+            if value == None:
+                return None
+        return value
+
+    def import_nested(self):
+        # imports nested entities (contacts, publications etc)
+        entities = self.import_string()
+        nested_attributes_as_list = []
+        for selected_entity in entities:
+            self.selected_entity = selected_entity
+            entity_metadata = {}
+            for common_attribute, t in self.translation_config.get(self.nested_entity_type).items():
+                # print('WORKING ON NESTED {}'.format(common_attribute))
+                attribute_value = self.get_attribute_value(common_attribute, t)
+                entity_metadata[common_attribute] = attribute_value
+                # print('NESTED {} : {}'.format(common_attribute, attribute_value))
+                nested_attributes_as_list.append(entity_metadata)
+        return nested_attributes_as_list # todo maybe need to wrap up as dict with alias rather than use a list
+
+    # Project Methods
+    def import_nested_publications(self):
+        self.nested_entity_type = 'publication'
+        return self.import_nested()
+        # todo check when I have an example bundle with a publication
+        # todo add method for status
+
+    def import_nested_contacts(self):
+        self.nested_entity_type = 'contact'
+        return self.import_nested()
+
+
+    # Contacts Methods
+
+    def import_first_name(self):
+        name = self.import_string_from_selected_entity()
+        try:
+            return name.split(',')[0]
+        except IndexError:
+            return None
+
+    def import_last_name(self):
+        name = self.import_string_from_selected_entity()
+        try:
+            return name.split(',')[-1]
+        except IndexError:
+            return None
+
+    def get_middle_initial(self):
+        name = self.import_string_from_selected_entity()
+        try:
+            return name.split(',')[1][0]
+        except IndexError:
+            return None
 
     # Assay Methods
     def get_hca_bundle_uuid(self):
-        return self.bundle.get('metadata').get('uuid')
+        return self.bundle_uuid
 
     # Sample Methods
     def highest_biological_entity_get(self):
         # for use when import parent is unknown but general type is biomaterial
         highest_biomaterial = self.bundle_info.ordered_biomaterials[0]
         d = self.metadata_files_by_uuid.get(highest_biomaterial)
-        return self.recursive_get(d)
+        for key in self.import_path:
+            if isinstance(d, list):
+                d = [x.get(key, None) for x in d]
+            else:
+                d = d.get(key, None)
+        return d
 
     def get_sample_material_type(self):
         highest_biomaterial_uuid = self.bundle_info.ordered_biomaterials[0]
@@ -140,13 +225,7 @@ class fetch_entity_metadata_translation:
         return extra_attributes
 
 
-    def recursive_get(self, d):
-        for key in self.import_path:
-            if isinstance(d, list):
-                d = [x.get(key, None) for x in d]
-            else:
-                d = d.get(key, None)
-        return d
+
 
 
 
