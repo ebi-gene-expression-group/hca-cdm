@@ -1,6 +1,8 @@
 '''
 gets metadata for a hca project uuid
 '''
+# todo automatically update config with new paths to attributes as HCA schema evolves
+
 
 __author__ = "hewgreen"
 __license__ = "Apache 2.0"
@@ -8,10 +10,9 @@ __date__ = "30/08/2019"
 
 from hca.dss import DSSClient
 import json
-import sys
 from ingest.api.ingestapi import IngestApi
 import converter_helper_func
-from get_common_model_entity_metadata import fetch_metadata
+from get_common_model_entity_metadata import fetch_entity_metadata_translation
 
 
 def get_dss_generator(hca_project_uuid):
@@ -89,6 +90,25 @@ def get_metadata_files_by_uuid(metadata_files):
                 metadata_files_by_uuid[uuid] = file
     return metadata_files_by_uuid
 
+def get_entity_granularity(common_entity_type):
+    # common data model, hardcoded granularity assumptions not part of config at this time
+
+    granularity={'project': 'one_entity_per_project',
+                 'study': 'one_entity_per_project',
+                 'publication': 'one_entity_per_project',
+                 'contact': 'one_entity_per_project',
+                 'sample': 'one_entity_per_hca_assay',
+                 'assay': 'one_entity_per_hca_assay',
+                 'assay_data': 'one_entity_per_hca_assay',
+                 'analysis': 'one_entity_per_hca_assay',
+                 'microarray_assay': 'unique_project_wide',
+                 'sequencing_assay': 'unique_project_wide',
+                 'data_file': 'unique_project_wide',
+                 'libs_attribs': 'unique_project_wide',
+                 'protocol': 'unique_project_wide'}
+    assert common_entity_type in granularity, "{} is an unrecognised entity type. Add to the granularity dict in code.".format(common_entity_type)
+    return granularity.get(common_entity_type)
+
 if __name__ == '__main__':
 
     # temp params
@@ -101,41 +121,42 @@ if __name__ == '__main__':
     get_generator = get_dss_generator(hca_project_uuid)
     res = get_generator[0]
     total_hits = get_generator[1]
-    # hca_schemas = get_hca_entity_types() # todo turn on for prod
+    # hca_schemas = get_hca_entity_types() # todo this will be for updating the config or checking it is up to date
 
-    # common data model, hardcoded granularity assumptions
-    granularity={
-    'one_entity_per_project' : ['project', 'study', 'publication', 'contact'],  # read once then skip
-    'one_entity_per_hca_assay' : ['sample', 'assay', 'assay_data'],  # read as new for every hca bundle
-    'unique_project_wide' : ['protocol']  # check for new ones every bundle and add to list if novel
-    }
 
     project_translated_output = {}
 
     for bundle in res:
 
-        bundle_info = converter_helper_func.bundle_info(bundle)
+        bundle_graph = converter_helper_func.bundle_info(bundle)
         metadata_files = bundle.get('metadata').get('files')
         metadata_files_by_uuid = get_metadata_files_by_uuid(metadata_files)
         # check_bundle_assumptions(hca_schemas) # todo turn on after testing
 
         for common_entity_type, attribute_translation in translation_config.items():
+            entity_granularity =  get_entity_granularity(common_entity_type)
+            translation_params = {
+                            'bundle': bundle,
+                            'common_entity_type' : common_entity_type,
+                            'attribute_translation' : attribute_translation,
+                            'bundle_graph' : bundle_graph,
+                            'metadata_files' : metadata_files,
+                            'metadata_files_by_uuid' : metadata_files_by_uuid
+            }
 
-            # different entity granularity handling due to hardcoded granularity assumptions
-            if common_entity_type in granularity['one_entity_per_project']:
-                if common_entity_type in project_translated_output:
+            if entity_granularity == 'one_entity_per_project':
+                if common_entity_type in project_translated_output: # skip if already there
                     continue
                 else:
-                    project_translated_output[common_entity_type] = fetch_metadata(bundle, common_entity_type, attribute_translation, bundle_info, metadata_files, metadata_files_by_uuid, granularity).translated_entity_metadata
-            elif common_entity_type in granularity['one_entity_per_hca_assay']:
+                    translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
+                    project_translated_output[common_entity_type] = translated_entity_metadata
+
+            elif entity_granularity == 'one_entity_per_hca_assay':
+                # always get then add to dict or create new entry
+                translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
                 if common_entity_type in project_translated_output:
-                    project_translated_output[common_entity_type] = {
-                    **project_translated_output.get(common_entity_type),
-                    **fetch_metadata(bundle, common_entity_type, attribute_translation, bundle_info, metadata_files, metadata_files_by_uuid, granularity).translated_entity_metadata}
+                    project_translated_output[common_entity_type] = {**project_translated_output.get(common_entity_type), **translated_entity_metadata}
                 else:
-                    project_translated_output[common_entity_type] = fetch_metadata(bundle, common_entity_type, attribute_translation, bundle_info, metadata_files, metadata_files_by_uuid, granularity).translated_entity_metadata
-
-            elif common_entity_type in granularity['unique_project_wide']:
-                continue  # todo loop through protocols in HCA bundle making a new entity if not already in bundle_translated_output
-
-            # todo automatically update config with new paths to attributes as HCA schema evolves
+                    project_translated_output[common_entity_type] = translated_entity_metadata
+            elif entity_granularity == 'unique_project_wide':
+                raise Exception('Need to build support for unique_project_wide type common entities')

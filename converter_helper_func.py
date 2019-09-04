@@ -10,9 +10,8 @@ class bundle_info:
     Logic for interpretation of HCA metadata graph should be done here.
     '''
     def __init__(self, bundle):
-        self.bundle = bundle
-        self.G = self.links_json_to_graph()
-        self.top_nodes = self.find_top_nodes()
+        self.G = self.links_json_to_graph(bundle)
+        self.top_nodes = self.find_top_nodes(bundle)
         self.ordered_biomaterials = self.get_ordered_biomaterial_list()
 
     def get_ordered_biomaterial_list(self):
@@ -23,18 +22,18 @@ class bundle_info:
                 ordered_biomaterials.append(node)
         return ordered_biomaterials
 
-    def find_top_nodes(self):
+    def find_top_nodes(self, bundle):
         top_nodes = []
         for node in self.G.in_degree():
             degree = node[1]
             if degree == 0:
                 top_nodes.append(node[0])
                 assert self.G.nodes[node[0]]['entity_type'] =='biomaterial', 'A detected top level node is not of type biomaterial'
-        assert len(top_nodes) > 0, 'Bundle {} has no nodes with 0 in degrees'.format(self.bundle.get('metadata').get('uuid'))
+        assert len(top_nodes) > 0, 'Bundle {} has no nodes with 0 in degrees'.format(bundle.get('metadata').get('uuid'))
         return top_nodes
 
-    def links_json_to_graph(self):
-        processes = self.bundle.get('metadata').get('files').get('links_json')[0].get('links')
+    def links_json_to_graph(self, bundle):
+        processes = bundle.get('metadata').get('files').get('links_json')[0].get('links')
         G = nx.DiGraph()
         node_names = {}
         node_types = {}
