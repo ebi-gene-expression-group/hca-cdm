@@ -7,14 +7,11 @@ from collections import OrderedDict
 
 class fetch_entity_metadata_translation:
     '''
-    func should return 1 dict for 1 common datamodel entity which can then be added to the project translated output
+    - func should return 1 dict for 1 common datamodel entity which can then be added to the project translated output
     by the main script
-
-    No logic needed to catch duplicates, this is in the main script.
-
-    alias should be dict key and value should be dict of attributes e.g. {"sample":{"alias_of_sample":{ATTRIBUTES GO HERE}}}
-
-    special handling functions are built into the class
+    - No logic needed to catch duplicates, this is in the main script.
+    - alias should be dict key and value should be dict of attributes e.g. {"sample":{"alias_of_sample":{ATTRIBUTES GO HERE}}}
+    - special handling functions are built into the class
     '''
 
     def __init__(self, translation_params):
@@ -33,29 +30,32 @@ class fetch_entity_metadata_translation:
 
         attribute_value_dict = {}
         for common_attribute, t in self.attribute_translation.items():
-            print('WORKING ON ATTRIBUTE: {}'.format(common_attribute))
+            self.common_attribute = common_attribute
+            self.t = t
 
-            attribute_value = self.get_attribute_value(common_attribute, t)
-            attribute_value_dict[common_attribute] = attribute_value
-            print('{} : {}'.format(common_attribute, attribute_value))
+            print('WORKING ON ATTRIBUTE: {}'.format(self.common_attribute))
+
+            attribute_value = self.get_attribute_value()
+            attribute_value_dict[self.common_attribute] = attribute_value
+            print('{} : {}'.format(self.common_attribute, attribute_value))
 
         self.translated_entity_metadata = {self.common_entity_type:{attribute_value_dict.get('alias'):attribute_value_dict}} # alias is required
 
     # main get method
-    def get_attribute_value(self, common_attribute, t):
-        if t.get('import', None).get('hca', None) == None: # if 'hca' is missing in config, return None (e.g. hca doesn't have fax attribute)
+    def get_attribute_value(self):
+        if self.t.get('import', None).get('hca', None) == None: # if 'hca' is missing in config, return None (e.g. hca doesn't have fax attribute)
             return
 
         # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
-        self.import_path = t.get('import').get('hca').get('path')
-        assert self.import_path, 'Missing import_path in config for attribute {}'.format(
-            self.common_entity_type + '.' + common_attribute)
+        self.import_path = self.t.get('import').get('hca').get('path')
+        assert self.import_path or self.import_path == [], 'Missing import_path in config for attribute {}'.format(
+            self.common_entity_type + '.' + self.common_attribute)
         # CONFIG REQUIRED used by converter to do all translations
-        self.import_method = t.get('import').get('hca').get('method')
-        assert self.import_path, 'Missing special_import_method in config for attribute {}'.format(
-            self.common_entity_type + '.' + common_attribute)
+        self.import_method = self.t.get('import').get('hca').get('method')
+        assert self.import_method, 'Missing special_import_method in config for attribute {}'.format(
+            self.common_entity_type + '.' + self.common_attribute)
         # CONFIG OPTIONAL used to do value translation
-        self.import_translation = t.get('import').get('hca').get('translation', None)
+        self.import_translation = self.t.get('import').get('hca').get('translation', None)
 
         # get attribute value
         attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
@@ -83,17 +83,31 @@ class fetch_entity_metadata_translation:
     def import_nested(self):
         # imports nested entities (contacts, publications etc)
         entities = self.import_string()
+        if entities == None:
+            return None
         nested_attributes_as_list = []
         for selected_entity in entities:
             self.selected_entity = selected_entity
             entity_metadata = {}
             for common_attribute, t in self.translation_config.get(self.nested_entity_type).items():
+                self.common_attribute = common_attribute
+                self.t = t
+
                 # print('WORKING ON NESTED {}'.format(common_attribute))
-                attribute_value = self.get_attribute_value(common_attribute, t)
+                attribute_value = self.get_attribute_value()
                 entity_metadata[common_attribute] = attribute_value
                 # print('NESTED {} : {}'.format(common_attribute, attribute_value))
                 nested_attributes_as_list.append(entity_metadata)
         return nested_attributes_as_list # todo maybe need to wrap up as dict with alias rather than use a list
+
+    def placeholder(self):
+        '''
+        Some entries (e.g. protocolrefs "protocol accessions/name used in the study")
+        require a whole project search which can only be performed at the end of the loop.
+        This method adds a placeholder marking the method for update after the fact.
+        todo add ability to build after the fact
+        '''
+        return str(self.common_attribute) + '_PLACEHOLDER'
 
     # Project Methods
     def import_nested_publications(self):
@@ -106,8 +120,10 @@ class fetch_entity_metadata_translation:
         self.nested_entity_type = 'contact'
         return self.import_nested()
 
-
     # Contacts Methods
+
+    #todo BUG 'fax' showing up rather than the word 'contacts' in final json
+    #todo BUG contacts are not unique. They should only show up once per project.
 
     def import_first_name(self):
         name = self.import_string_from_selected_entity()
@@ -130,14 +146,28 @@ class fetch_entity_metadata_translation:
         except IndexError:
             return None
 
+    # Study Methods
+
+    #todo BUG 'null' is the name of the study entity. Alias shoudl be required field or have a unique backup.
+
+    def get_experiment_type(self):
+        return 'RNA-seq of coding RNA from single cells'
+
+    def get_study_type(self):
+        return 'singlecell'
+
     # Assay Methods
     def get_hca_bundle_uuid(self):
         return self.bundle_uuid
 
     # Sample Methods
+
+    #todo BUG sample alias is 'sample'. Needs looking at.
+    #todo BUG only detecting 1 donor, 1 specimen and 1 cell suspension for the dataset.
+
     def highest_biological_entity_get(self):
         # for use when import parent is unknown but general type is biomaterial
-        highest_biomaterial = self.bundle_info.ordered_biomaterials[0]
+        highest_biomaterial = self.bundle_graph.ordered_biomaterials[0]
         d = self.metadata_files_by_uuid.get(highest_biomaterial)
         for key in self.import_path:
             if isinstance(d, list):
@@ -147,7 +177,7 @@ class fetch_entity_metadata_translation:
         return d
 
     def get_sample_material_type(self):
-        highest_biomaterial_uuid = self.bundle_info.ordered_biomaterials[0]
+        highest_biomaterial_uuid = self.bundle_graph.ordered_biomaterials[0]
         highest_biomaterial = self.metadata_files_by_uuid.get(highest_biomaterial_uuid)
         return highest_biomaterial.get('describedBy').split('/')[-1]
 
@@ -177,7 +207,7 @@ class fetch_entity_metadata_translation:
 
         entity_counter = {}
 
-        for biomaterial_uuid in self.bundle_info.ordered_biomaterials:
+        for biomaterial_uuid in self.bundle_graph.ordered_biomaterials:
             # # certain branches can be ignored when exploring the tree.
 
             biomaterial_metadata = self.metadata_files_by_uuid.get(biomaterial_uuid)
@@ -224,17 +254,4 @@ class fetch_entity_metadata_translation:
 
         return extra_attributes
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # Data File Methods

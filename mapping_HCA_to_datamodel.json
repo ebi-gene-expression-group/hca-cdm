@@ -177,6 +177,11 @@
           ],
           "from_type": "string",
           "method": "import_string"
+        },
+        "hca": {
+          "path": ["project_json", "provenance", "documant_id"],
+          "from_type": "sting",
+          "method": "import_string"
         }
       }
     },
@@ -193,15 +198,14 @@
           "method": "import_string"
         },
         "hca": {
-          "parent": "project",
-          "path": ["project", "array_express_accessions"],
+          "path": ["project_json", "array_express_accessions"],
           "from_type": "sting",
           "method": "import_string"
         }
       }
     },
     "title": {
-      "description": "submitter provided study description",
+      "description": "submitter provided study title",
       "type": "string",
       "import": {
         "ae": {
@@ -213,8 +217,7 @@
           "method": "import_string"
         },
         "hca": {
-          "parent": "project",
-          "path": ["project", "project_core", "project_title"],
+          "path": ["project_json", "project_core", "project_title"],
           "from_type": "sting",
           "method": "import_string"
         }
@@ -233,8 +236,7 @@
           "method": "import_string"
         },
         "hca": {
-          "parent": "project",
-          "path": ["project", "project_core", "project_description"],
+          "path": ["project_json", "project_core", "project_description"],
           "from_type": "sting",
           "method": "import_string"
         }
@@ -292,6 +294,7 @@
           "method": "get_string_from_attribute"
         },
         "hca": {
+          "path": [],
           "method": "get_experiment_type"
         }
       }
@@ -308,6 +311,15 @@
           ],
           "from_type": "string",
           "method": "import_string"
+        },
+        "hca": {
+          "path": [
+            "project_json",
+            "provenance",
+            "submission_date"
+          ],
+          "from_type": "sting",
+          "method": "import_string"
         }
       }
     },
@@ -321,7 +333,8 @@
           "method": "get_reference_value_from_json"
         },
         "hca": {
-          "method": "get_protocolrefs"
+          "path" : [],
+          "method": "placeholder"
         }
       }
     },
@@ -334,7 +347,8 @@
           "method": "get_reference_value_from_json"
         },
         "hca": {
-          "method": "get_projectrefs"
+          "path" : [],
+          "method": "placeholder"
         }
       }
     },
@@ -352,6 +366,7 @@
           "method": "get_string_from_attribute"
         },
         "hca": {
+          "path" : [],
           "method": "get_study_type"
         }
       }
@@ -724,8 +739,7 @@
           "method": "import_string"
         },
         "hca": {
-          "parent": "project",
-          "path": ["reference_file", "file_core", "file_name"],
+          "path": ["sequence_file", "file_core", "file_name"],
           "from_type": "sting",
           "method": "import_string"
         }

@@ -114,7 +114,8 @@ if __name__ == '__main__':
 
     # temp params
     hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
-    translation_config_file = './mapping_HCA_to_datamodel.json'
+    # translation_config_file = './mapping_HCA_to_datamodel.json'
+    translation_config_file = './temp_config.json'
     with open(translation_config_file) as f:
         translation_config = json.load(f)
 
@@ -163,9 +164,16 @@ if __name__ == '__main__':
 
             elif entity_granularity == 'unique_project_wide':
                 # check by alias first before grabbing all metadata. Skip if seen before.
+
+                # todo alias = ??? need alias for all of these catagories. Should I assume the 1st attribute is this? for data_file this is name which is ok to use.
                 raise Exception('Need to build support for unique_project_wide type common entities')
 
             elif entity_granularity == 'skip_nested':
                 # nested entites are handled at the higher level when called by the config because the higher level entity needs a list of these entities
                 continue
-            sys.exit()
+
+    # temp writing out json for inspection
+    import json
+    with open('temp_out.json', 'w') as f:
+        json.dump(project_translated_output, f)
+    print(project_translated_output)
