@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # temp params
     hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
     # translation_config_file = './mapping_HCA_to_datamodel.json'
-    translation_config_file = './temp_config.json'
+    translation_config_file = 'temp_config.json'
     with open(translation_config_file) as f:
         translation_config = json.load(f)
 

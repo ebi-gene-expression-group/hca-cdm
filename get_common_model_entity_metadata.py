@@ -37,7 +37,7 @@ class fetch_entity_metadata_translation:
 
             attribute_value = self.get_attribute_value()
             attribute_value_dict[self.common_attribute] = attribute_value
-            print('{} : {}'.format(self.common_attribute, attribute_value))
+            # print('{} : {}'.format(self.common_attribute, attribute_value))
 
         self.translated_entity_metadata = {self.common_entity_type:{attribute_value_dict.get('alias'):attribute_value_dict}} # alias is required
 
@@ -161,9 +161,6 @@ class fetch_entity_metadata_translation:
         return self.bundle_uuid
 
     # Sample Methods
-
-    #todo BUG sample alias is 'sample'. Needs looking at.
-    #todo BUG only detecting 1 donor, 1 specimen and 1 cell suspension for the dataset.
 
     def highest_biological_entity_get(self):
         # for use when import parent is unknown but general type is biomaterial

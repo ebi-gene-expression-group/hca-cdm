@@ -179,7 +179,11 @@
           "method": "import_string"
         },
         "hca": {
-          "path": ["project_json", "provenance", "documant_id"],
+          "path": [
+            "project_json",
+            "project_core",
+            "project_short_name"
+          ],
           "from_type": "sting",
           "method": "import_string"
         }
