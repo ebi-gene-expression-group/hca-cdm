@@ -99,13 +99,12 @@ def get_entity_granularity(common_entity_type):
                  'publication': 'skip_nested',
                  'contact': 'skip_nested',
                  'sample': 'one_entity_per_hca_assay',
-                 'assay': 'one_entity_per_hca_assay',
                  'assay_data': 'one_entity_per_hca_assay',
+                 'singlecell_assay': 'one_entity_per_hca_assay',
                  'analysis': 'one_entity_per_hca_assay',
                  'microarray_assay': 'unique_project_wide',
                  'sequencing_assay': 'unique_project_wide',
                  'data_file': 'unique_project_wide',
-                 'libs_attribs': 'unique_project_wide',
                  'protocol': 'unique_project_wide'}
     assert common_entity_type in granularity, "{} is an unrecognised entity type. Add to the granularity dict in code.".format(common_entity_type)
     return granularity.get(common_entity_type)
@@ -115,9 +114,14 @@ if __name__ == '__main__':
     # temp params
     hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
     # translation_config_file = './mapping_HCA_to_datamodel.json'
-    translation_config_file = 'temp_config.json'
+    translation_config_file = 'mapping_HCA_to_datamodel.json'
+    converter_helper_func.conf_coverage(translation_config_file)
     with open(translation_config_file) as f:
         translation_config = json.load(f)
+
+    # temp function to show hca coverage in config
+    converter_helper_func.conf_coverage(translation_config_file)
+    sys.exit()
 
     # initialise
     get_generator = get_dss_generator(hca_project_uuid)
@@ -179,3 +183,4 @@ if __name__ == '__main__':
     with open('temp_out.json', 'w') as f:
         json.dump(project_translated_output, f)
     print(project_translated_output)
+

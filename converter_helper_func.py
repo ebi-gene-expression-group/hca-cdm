@@ -3,6 +3,7 @@ __license__ = "Apache 2.0"
 __date__ = "30/08/2019"
 
 import networkx as nx
+import json
 
 class bundle_info:
     '''
@@ -55,3 +56,29 @@ class bundle_info:
             node_types[process_uuid] = 'process'
         nx.set_node_attributes(G, node_types, 'entity_type')
         return G
+
+def conf_coverage(translation_config_file):
+    # helper func to show which fields are covered/not covered by the config
+    print('Using config: {}'.format(translation_config_file))
+    config_summary = {}
+    hca_mapped_counter = 0
+    with open(translation_config_file) as f:
+        translation_config = json.load(f)
+    for entity, t in translation_config.items():
+        for attribute, d in t.items():
+            attribute_name = '.'.join([entity, attribute])
+            try:
+                hca_mapped = 'hca' in d.get('import')
+            except TypeError:
+                print('Attribute {} does not contain an import field'.format(attribute_name))
+            if hca_mapped:
+                hca_mapped_counter += 1
+            else:
+                print('NO HCA CONFIG MAPPING TO {}'.format(attribute_name))
+            config_summary[attribute_name] = hca_mapped
+    # print('{} attributes in config'.format(len(config_summary)))
+    print('{}/{} attributes have hca mapping'.format(hca_mapped_counter, len(config_summary)))
+
+
+
+
