@@ -99,7 +99,7 @@ class fetch_entity_metadata_translation:
                 attribute_value = self.get_attribute_value()
                 entity_metadata[common_attribute] = attribute_value
                 # print('NESTED {} : {}'.format(common_attribute, attribute_value))
-                nested_attributes_as_list.append(entity_metadata)
+            nested_attributes_as_list.append(entity_metadata)
         self.common_attribute = self.nested_entity_type
         return nested_attributes_as_list # todo maybe need to wrap up as dict with alias rather than use a list
 
@@ -124,8 +124,6 @@ class fetch_entity_metadata_translation:
         return self.import_nested()
 
     # Contacts Methods
-
-    #todo BUG contacts are not unique. They should only show up once per project.
 
     def import_first_name(self):
         name = self.import_string_from_selected_entity()
