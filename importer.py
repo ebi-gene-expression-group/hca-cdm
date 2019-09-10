@@ -152,15 +152,17 @@ if __name__ == '__main__':
                     continue
                 else:
                     translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
-                    project_translated_output[common_entity_type] = translated_entity_metadata
+                    project_translated_output.update(translated_entity_metadata)
 
             elif entity_granularity == 'one_entity_per_hca_assay':
                 # always get then add to dict or create new entry
                 translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
                 if common_entity_type in project_translated_output:
-                    project_translated_output[common_entity_type] = {**project_translated_output.get(common_entity_type), **translated_entity_metadata}
+                    project_translated_output.get(common_entity_type).update(translated_entity_metadata.get(common_entity_type))
+                    # project_translated_output[common_entity_type] = {**project_translated_output.get(common_entity_type), **translated_entity_metadata}
                 else:
-                    project_translated_output[common_entity_type] = translated_entity_metadata
+                    # project_translated_output[common_entity_type] = translated_entity_metadata
+                    project_translated_output.update(translated_entity_metadata)
 
             elif entity_granularity == 'unique_project_wide':
                 # check by alias first before grabbing all metadata. Skip if seen before.
