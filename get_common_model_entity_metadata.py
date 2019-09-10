@@ -90,6 +90,8 @@ class fetch_entity_metadata_translation:
             self.selected_entity = selected_entity
             entity_metadata = {}
             for common_attribute, t in self.translation_config.get(self.nested_entity_type).items():
+                if not t.get('import').get('hca', False): # skip fields without a hca entry
+                    continue
                 self.common_attribute = common_attribute
                 self.t = t
 
@@ -98,6 +100,7 @@ class fetch_entity_metadata_translation:
                 entity_metadata[common_attribute] = attribute_value
                 # print('NESTED {} : {}'.format(common_attribute, attribute_value))
                 nested_attributes_as_list.append(entity_metadata)
+        self.common_attribute = self.nested_entity_type
         return nested_attributes_as_list # todo maybe need to wrap up as dict with alias rather than use a list
 
     def placeholder(self):
@@ -122,7 +125,6 @@ class fetch_entity_metadata_translation:
 
     # Contacts Methods
 
-    #todo BUG 'fax' showing up rather than the word 'contacts' in final json
     #todo BUG contacts are not unique. They should only show up once per project.
 
     def import_first_name(self):
