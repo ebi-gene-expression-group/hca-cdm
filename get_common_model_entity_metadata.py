@@ -148,8 +148,6 @@ class fetch_entity_metadata_translation:
 
     # Study Methods
 
-    #todo BUG 'null' is the name of the study entity. Alias shoudl be required field or have a unique backup.
-
     def get_experiment_type(self):
         return 'RNA-seq of coding RNA from single cells'
 
@@ -162,10 +160,10 @@ class fetch_entity_metadata_translation:
 
     # Sample Methods
 
-    def highest_biological_entity_get(self):
+    def lowest_biological_entity_get(self):
         # for use when import parent is unknown but general type is biomaterial
-        highest_biomaterial = self.bundle_graph.ordered_biomaterials[0]
-        d = self.metadata_files_by_uuid.get(highest_biomaterial)
+        lowest_biomaterial = self.bundle_graph.ordered_biomaterials[-1]
+        d = self.metadata_files_by_uuid.get(lowest_biomaterial)
         for key in self.import_path:
             if isinstance(d, list):
                 d = [x.get(key, None) for x in d]
@@ -182,7 +180,7 @@ class fetch_entity_metadata_translation:
         '''
         Extract extra attributes not captured by common data model schema.
         Look at biomaterials in order of sequence in the graph.
-        todo ignore fields that have already been added to the model for the top entity.
+        todo ignore fields that have already been added to the model for the last entity.
         todo this counter may need some refactoring when the design is complete. This is to protect against replacing keys of the same attribute in the column headers of the sdrf. This needs testing with real data.
         '''
 

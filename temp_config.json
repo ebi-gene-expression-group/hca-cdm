@@ -629,9 +629,9 @@
         "hca": {
           "path": [
             "biomaterial_core",
-            "biomaterial_name"
+            "biomaterial_id"
           ],
-          "method": "highest_biological_entity_get"
+          "method": "lowest_biological_entity_get"
         }
       }
     },
@@ -648,7 +648,7 @@
             "biomaterial_core",
             "biomaterial_id"
           ],
-          "method": "highest_biological_entity_get"
+          "method": "lowest_biological_entity_get"
         }
       }
     },
@@ -665,7 +665,7 @@
             "genus_species",
             "text"
           ],
-          "method": "highest_biological_entity_get"
+          "method": "lowest_biological_entity_get"
         }
       }
     },
@@ -682,7 +682,7 @@
             "biomaterial_core",
             "ncbi_taxon_id"
           ],
-          "method": "highest_biological_entity_get"
+          "method": "lowest_biological_entity_get"
         }
       }
     },
@@ -713,7 +713,7 @@
             "biomaterial_core",
             "biomaterial_description"
           ],
-          "method": "highest_biological_entity_get"
+          "method": "lowest_biological_entity_get"
         }
       }
     },
