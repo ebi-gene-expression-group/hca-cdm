@@ -1,733 +1,248 @@
 {
-  "project": {
+  "sequencing_assay": {
     "alias": {
-      "description": "unique project name (auto-generated from MAGE-TAB file name)",
+      "description": "unique name of the assay",
       "type": "string",
       "import": {
         "ae": {
-          "parent": "project",
-          "path": [
-            "alias"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "project_core",
-            "project_short_name"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "accession": {
-      "description": "BioStudies accession",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "project",
-          "path": [
-            "accession"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "biostudies_accessions"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "title": {
-      "description": "(optional) submitter provided project description",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "project",
-          "path": [
-            "title"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "project_core",
-            "project_title"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "description": {
-      "description": "(optional) free-text project description",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "project",
-          "path": [
-            "description"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "project_core",
-            "project_description"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "releaseDate": {
-      "description": "date of public release",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "project",
-          "path": [
-            "releaseDate"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "provenance",
-            "submission_date"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "publications": {
-      "description": "list of Publication class objects",
-      "type": "array",
-      "items": {
-        "$ref": "#/publication"
-      },
-      "import": {
-        "ae": {
-          "parent": "project",
-          "path": [
-            "publications"
-          ],
-          "from_type": "array",
-          "method": "import_publication"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "publications"
-          ],
-          "from_type": "array",
-          "method": "import_nested_publications"
-        }
-      }
-    },
-    "contacts": {
-        "description": "list of Contact class objects",
-        "type": "array",
-        "items": {
-          "$ref": "#/definitions/contact"
-        },
-        "import": {
-          "ae": {
-            "parent": "project",
-            "path": [
-              "contacts"
-            ],
-            "from_type": "array",
-            "method": "import_contact"
-          },
-          "hca": {
-            "path": [
-              "project_json",
-              "contributors"
-            ],
-            "from_type": "array",
-            "method": "import_nested_contacts"
-          }
-        }
-      }
-    },
-  "study": {
-    "alias": {
-      "description": "UUID of the USI submission",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "study",
+          "parent": "assay",
           "path": [
             "alias"
           ],
           "from_type": "string",
           "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "project_core",
-            "project_short_name"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
         }
       }
     },
     "accession": {
-      "description": "ArrayExpress experiment accession",
+      "description": "ENA experiment accession",
       "type": "string",
       "import": {
         "ae": {
-          "parent": "study",
-          "path": [
-            "accession"
-          ],
-          "from_type": "string",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["project_json", "array_express_accessions"],
-          "from_type": "sting",
+          "path": ["accession"],
           "method": "import_string"
         }
       }
     },
-    "title": {
-      "description": "submitter provided study title",
+    "technology_type": {
+      "description": "array assay or sequencing assay",
       "type": "string",
       "import": {
         "ae": {
-          "parent": "study",
+          "parent": "assay",
           "path": [
-            "title"
+            "attributes",
+            "technology_type"
           ],
           "from_type": "string",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["project_json", "project_core", "project_title"],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "description": {
-      "description": "free-text description of study background and aim",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "study",
-          "path": [
-            "description"
-          ],
-          "from_type": "string",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["project_json", "project_core", "project_description"],
-          "from_type": "sting",
-          "method": "import_string"
-        }
-      }
-    },
-    "experimental_factor": {
-      "description": "list of experimental factors as Attribute class objects",
-      "type": "array",
-      "items": {
-        "$ref": "#definitions/attribute"
-      },
-      "import": {
-        "ae": {
-          "parent": "study",
-          "path": [
-            "attributes",
-            "experimental_factor"
-          ],
-          "from_type": "attribute_object",
-          "method": "generate_attribute_from_json"
-        }
-      }
-    },
-    "experimental_design": {
-      "description": "(optional) list of experimental designs as Attribute class objects",
-      "type": "array",
-      "items": {
-        "$ref": "#definitions/attribute"
-      },
-      "import": {
-        "ae": {
-          "parent": "study",
-          "path": [
-            "attributes",
-            "experimental_design"
-          ],
-          "from_type": "attribute_object",
-          "method": "generate_attribute_from_json"
-        }
-      }
-    },
-    "experiment_type": {
-      "description": "experiment type ontology terms",
-      "type": "array",
-      "items": {
-      },
-      "import": {
-        "ae": {
-          "parent": "study",
-          "path": [
-            "attributes",
-            "experiment_type"
-          ],
-          "from_type": "attribute_object",
           "method": "get_string_from_attribute"
-        },
-        "hca": {
-          "path": [],
-          "method": "get_experiment_type"
-        }
-      }
-    },
-    "date_of_experiment": {
-      "description": "(optional) date of experiment",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "study",
-          "path": [
-            "attributes",
-            "date_of_experiment"
-          ],
-          "from_type": "string",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "project_json",
-            "provenance",
-            "submission_date"
-          ],
-          "from_type": "sting",
-          "method": "import_string"
         }
       }
     },
     "protocolrefs": {
-      "description": "protocol accessions/name used in the study",
+      "description": "protocol accessions/name used to generate assay data",
       "type": "array",
       "import": {
         "ae": {
-          "path": ["protocolRefs"],
-          "from_type": "array",
-          "method": "get_reference_value_from_json"
-        },
-        "hca": {
-          "path" : [],
-          "method": "placeholder"
-        }
-      }
-    },
-    "projectref": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["projectRef"],
-          "from_type": "ref_object",
-          "method": "get_reference_value_from_json"
-        },
-        "hca": {
-          "path" : [],
-          "method": "placeholder"
-        }
-      }
-    },
-    "study_type": {
-      "description": "submission type: microarray, sequencing, singlecell",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "study",
+          "parent": "assay",
           "path": [
-            "attributes",
-            "study_type"
+            "protocolUses"
           ],
-          "from_type": "attribute_object",
+          "from_type": "array",
+          "method": "get_reference_usage"
+        }
+      }
+    },
+    "sampleref": {
+      "description": "sample accession/name",
+      "type": "string",
+      "import": {
+        "ae": {
+          "parent": "assay",
+          "path": [
+            "sampleUses"
+          ],
+          "from_type": "array",
+          "method": "get_reference_usage"
+        }
+      }
+    },
+    "library_layout": {
+      "description": "The layout of the sequencing library, SINGLE or PAIRED.",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "library_layout"],
           "method": "get_string_from_attribute"
-        },
-        "hca": {
-          "path" : [],
-          "method": "get_study_type"
+        }
+      }
+    },
+    "library_source": {
+      "description": "The source material of the sequencing library, e.g. TRANSCRIPTOMIC.",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "library_source"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "library_strategy": {
+      "description": "The type of sequencing approach, e.g. RNA-Seq.",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "library_strategy"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "library_selection": {
+      "description": "The selection strategy of the faction of nucleic acid that was sequenced.",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "library_selection"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "nominal_length": {
+      "description": "Nominal length, i.e. length of the insert",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "nominal_length"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "nominal_sdev": {
+      "description": "standard deviation of the nominal length",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "nominal_sdev"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "orientation": {
+      "description": "for paired-end, the orientation of the two reads in the sequence file",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "orientation"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "platform_type": {
+      "description": "manufacturer of the sequencing machine",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "platform_type"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "instrument_model": {
+      "description": "sequencer model",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "instrument_model"],
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "library_strand": {
+      "description": "the strand that is being sequenced in directional RNA-seq",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "library_strand"],
+          "method": "get_string_from_attribute"
         }
       }
     }
   },
-  "publication": {
-    "articleTitle": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "publication",
-          "path": ["articleTitle"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["title"],
-          "from_type": "sting",
-          "method": "import_nested_publications"
-        }
-      }
-    },
-    "authors": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "publication",
-          "path": ["authors"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["authors"],
-          "from_type": "sting",
-          "method": "import_nested_publications"
-        }
-      }
-    },
-    "pubmedId": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "publication",
-          "path": ["pubmedId"],
-          "from_type": "integer",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["pmid"],
-          "from_type": "sting",
-          "method": "import_nested_publications"
-        }
-      }
-    },
-    "doi": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "publication",
-          "path": ["doi"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": ["doi"],
-          "from_type": "sting",
-          "method": "import_nested_publications"
-        }
-      }
-    },
-    "status": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "publication",
-          "path": ["publicationStatus"],
-          "from_type": "sting",
-          "method": "import_string",
-          "translation": {
-            "Unknown" : "",
-            "InPreparation": "in preparation",
-            "Submitted": "submitted",
-            "Published": "published"
-          }
-        }
-      }
-    }
-  },
-  "contact": {
-    "firstName":{
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["firstName"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "name"
-            ],
-          "from_type": "sting",
-          "method": "import_first_name"
-        }
-      }
-    },
-    "lastName":{
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["lastName"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "name"
-            ],
-          "from_type": "sting",
-          "method": "import_last_name"
-        }
-      }
-    },
-    "email": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["email"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "email"
-            ],
-          "from_type": "sting",
-          "method": "import_string_from_selected_entity"
-        }
-      }
-    },
-    "affiliation": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["affiliation"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "institution"
-            ],
-          "from_type": "sting",
-          "method": "import_string_from_selected_entity"
-        }
-      }
-    },
-    "address": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["address"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "address"
-            ],
-          "from_type": "sting",
-          "method": "import_string_from_selected_entity"
-        }
-      }
-    },
-    "phone": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["phone"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "phone"
-            ],
-          "from_type": "sting",
-          "method": "import_string_from_selected_entity"
-        }
-      }
-    },
-    "roles": {
-      "type": "array",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["roles"],
-          "from_type": "array",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-              "project_role",
-              "text"
-            ],
-          "from_type": "sting",
-          "method": "import_string_from_selected_entity"
-        }
-      }
-    },
-    "middleInitials": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["middleInitials"],
-          "from_type": "sting",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "name"
-            ],
-          "from_type": "sting",
-          "method": "get_middle_initial"
-        }
-      }
-    },
-    "fax": {
-      "type": "array",
-      "import": {
-        "ae": {
-          "parent": "contact",
-          "path": ["fax"],
-          "from_type": "array",
-          "method": "import_string"
-        }
-      }
-    }
-  },
-  "sample": {
+  "protocol": {
     "alias": {
+      "description": "protocol accession or unique name in experiment",
       "type": "string",
       "import": {
         "ae": {
           "path": ["alias"],
           "from_type": "string",
           "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "biomaterial_core",
-            "biomaterial_id"
-          ],
-          "method": "lowest_biological_entity_get"
         }
       }
     },
-    "accession": {
+    "accession":{
+      "description": "ArrayExpress protocol accession",
       "type": "string",
       "import": {
         "ae": {
           "path": ["accession"],
           "from_type": "string",
           "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "biomaterial_core",
-            "biomaterial_id"
-          ],
-          "method": "lowest_biological_entity_get"
-        }
-      }
-    },
-    "taxon": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["taxon"],
-          "from_type": "string",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "genus_species",
-            "text"
-          ],
-          "method": "lowest_biological_entity_get"
-        }
-      }
-    },
-    "taxonId": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["taxonId"],
-          "from_type": "integer",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "biomaterial_core",
-            "ncbi_taxon_id"
-          ],
-          "method": "lowest_biological_entity_get"
-        }
-      }
-    },
-    "material_type": {
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "material_type"],
-          "from_type": "attribute_object",
-          "method": "generate_attribute_from_json"
-        },
-        "hca": {
-          "path": [],
-          "method": "get_sample_material_type"
         }
       }
     },
     "description": {
+      "description": "free-text description of protocol",
       "type": "string",
       "import": {
         "ae": {
-          "path": ["attributes", "description"],
-          "from_type": "attribute_object",
-          "method": "generate_attribute_from_json"
-        },
-        "hca": {
-          "path": [
-            "biomaterial_core",
-            "biomaterial_description"
-          ],
-          "method": "lowest_biological_entity_get"
+          "path": ["description"],
+          "from_type": "string",
+          "method": "import_string"
         }
       }
     },
-    "attributes": {
-      "type": "array",
+    "protocol_type": {
+      "description": "experiment type ontology term",
+      "type": "attribute_object",
       "import": {
         "ae": {
-          "path": ["attributes"],
+          "path": ["attributes", "protocol_type"],
           "from_type": "array",
-          "method": "generate_sample_attribute_dict"
-        },
-        "hca": {
-          "path": [],
-          "method": "get_other_biomaterial_attributes"
+          "method": "generate_attribute_from_json"
+        }
+      }
+    },
+    "hardware": {
+      "description": "free-text hardware description, sequencer model for sequencing experiments",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "hardware"],
+          "from_type": "string",
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "software":{
+      "description": "free-text software description",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "software"],
+          "from_type": "string",
+          "method": "get_string_from_attribute"
+        }
+      }
+    },
+    "performer": {
+      "description": "performer of the protocol",
+      "type": "string",
+      "import": {
+        "ae": {
+          "path": ["attributes", "performer"],
+          "from_type": "string",
+          "method": "get_string_from_attribute"
         }
       }
     }

@@ -2,6 +2,7 @@
 gets metadata for a hca project uuid
 '''
 # todo automatically update config with new paths to attributes as HCA schema evolves
+# todo ref attributes are for linking. We need a method to fill these fields. For now they have placeholders only!
 
 
 __author__ = "hewgreen"
@@ -104,7 +105,7 @@ def get_entity_granularity(common_entity_type):
                  'analysis': 'one_entity_per_hca_assay',
                  'microarray_assay': 'unique_project_wide',
                  'sequencing_assay': 'unique_project_wide',
-                 'data_file': 'unique_project_wide',
+                 'data_file': 'skip_nested',
                  'protocol': 'unique_project_wide'}
     assert common_entity_type in granularity, "{} is an unrecognised entity type. Add to the granularity dict in code.".format(common_entity_type)
     return granularity.get(common_entity_type)
@@ -113,15 +114,18 @@ if __name__ == '__main__':
 
     # temp params
     hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
-    # translation_config_file = './mapping_HCA_to_datamodel.json'
-    translation_config_file = 'mapping_HCA_to_datamodel.json'
-    converter_helper_func.conf_coverage(translation_config_file)
+
+
+    # translation_config_file = 'temp_config.json'
+    # translation_config_file = 'mapping_HCA_to_datamodel.json'
+    translation_config_file = 'temp_temp_conf.json'
+
+
     with open(translation_config_file) as f:
         translation_config = json.load(f)
 
     # temp function to show hca coverage in config
-    converter_helper_func.conf_coverage(translation_config_file)
-    sys.exit()
+    # converter_helper_func.conf_coverage(translation_config_file)
 
     # initialise
     get_generator = get_dss_generator(hca_project_uuid)
@@ -167,7 +171,6 @@ if __name__ == '__main__':
                 else:
                     # project_translated_output[common_entity_type] = translated_entity_metadata
                     project_translated_output.update(translated_entity_metadata)
-
             elif entity_granularity == 'unique_project_wide':
                 # check by alias first before grabbing all metadata. Skip if seen before.
 
@@ -175,12 +178,12 @@ if __name__ == '__main__':
                 raise Exception('Need to build support for unique_project_wide type common entities')
 
             elif entity_granularity == 'skip_nested':
-                # nested entites are handled at the higher level when called by the config because the higher level entity needs a list of these entities
+                # nested entites are handled at the higher level when called by the config
                 continue
 
     # temp writing out json for inspection
     import json
     with open('temp_out.json', 'w') as f:
         json.dump(project_translated_output, f)
-    print(project_translated_output)
+    # print(project_translated_output)
 

@@ -48,6 +48,7 @@ class fetch_entity_metadata_translation:
 
         # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
         self.import_path = self.t.get('import').get('hca').get('path')
+        self.import_translation = self.t.get('import').get('hca').get('translation', None)
         assert self.import_path or self.import_path == [], 'Missing import_path in config for attribute {}'.format(
             self.common_entity_type + '.' + self.common_attribute)
         # CONFIG REQUIRED used by converter to do all translations
@@ -65,11 +66,23 @@ class fetch_entity_metadata_translation:
     # General Methods
     def import_string(self):
         # follow path and return value
+        assert len(self.import_path) > 0, 'Path is required to use this method. Please add one to the config for this attribute. See {}'.format(str(self.common_entity_type+ '.' + self.common_attribute))
         files = self.metadata_files.get(self.import_path[0])
+        assert files, 'File {} not found in bundle'.format(self.import_path[0])
         assert len(files) == 1, 'This method expects 1 file per bundle. Detected mutiple {} entities in bundle {}'.format(self.common_entity_type, self.bundle_uuid)
+
         value = files[0]
         for level in self.import_path[1:]:
-            value = value.get(level)
+            if value:
+                value = value.get(level, None)
+            else:
+                continue
+
+        # ontology_label is preferred but text field should be serched if value is not available
+        if self.import_path[-1] == 'ontology_label' and value == None:
+            self.import_path[-1] = 'text'
+            self.import_string()
+
         return value
 
     def import_string_from_selected_entity(self):
@@ -80,9 +93,8 @@ class fetch_entity_metadata_translation:
                 return None
         return value
 
-    def import_nested(self):
+    def import_nested(self, entities):
         # imports nested entities (contacts, publications etc)
-        entities = self.import_string()
         if entities == None:
             return None
         nested_attributes_as_list = []
@@ -112,16 +124,33 @@ class fetch_entity_metadata_translation:
         '''
         return str(self.common_attribute) + '_PLACEHOLDER'
 
+    def use_translation(self):
+        # this method relies ont he translation field in the config to perform value manipulation.
+        assert self.import_translation != None, 'This method requires a translation string or dict in the config file.'
+        assert isinstance(self.import_translation, (str, dict)), 'Translation in config should be of type str or dict'
+        if type(self.import_translation) == str:
+            return self.import_translation
+        elif type(self.import_translation) == dict:
+            value = str(self.import_string())
+            value_translation = self.import_translation.get(value, 'NOT FOUND')
+
+            # Stop if mapping not found. Expects all values be in translation dict even if unchanged. The behaivor may need to change in the future.
+            assert value_translation != 'NOT FOUND', 'Value "{}" is not in the config dict and cannot be converted. See {}'.format(value, str(self.common_entity_type+ '.' + self.common_attribute))
+            return value_translation
+
+
     # Project Methods
     def import_nested_publications(self):
         self.nested_entity_type = 'publication'
-        return self.import_nested()
+        entities = self.import_string()
+        return self.import_nested(entities)
         # todo check when I have an example bundle with a publication
         # todo add method for status
 
     def import_nested_contacts(self):
         self.nested_entity_type = 'contact'
-        return self.import_nested()
+        entities = self.import_string()
+        return self.import_nested(entities)
 
     # Contacts Methods
 
@@ -145,14 +174,6 @@ class fetch_entity_metadata_translation:
             return name.split(',')[1][0]
         except IndexError:
             return None
-
-    # Study Methods
-
-    def get_experiment_type(self):
-        return 'RNA-seq of coding RNA from single cells'
-
-    def get_study_type(self):
-        return 'singlecell'
 
     # Assay Methods
     def get_hca_bundle_uuid(self):
@@ -249,4 +270,35 @@ class fetch_entity_metadata_translation:
 
         return extra_attributes
 
-    # Data File Methods
+    # Assay Data Methods
+
+    def import_nested_data_files(self):
+        # data files are 'nested' in the common model but not in the HCA model so entities are derived differently
+        self.nested_entity_type = 'data_file'
+        entities = self.metadata_files
+        for level in self.import_path:
+            if entities:
+                entities = entities.get(level, None)
+            else:
+                continue
+        return self.import_nested(entities)
+
+    # Data file method
+
+    def get_checksum_method(self):
+        # only return method if the file has a checksum
+        checksum_method_path = self.import_path
+        self.import_path = self.translation_config\
+                            .get('data_file', None)\
+                            .get('checksum', None)\
+                            .get('import', None)\
+                            .get('hca', None)\
+                            .get('path', None)
+        assert self.import_path, 'Hardcoded path in code has broken. Please repair.'
+        if self.import_string_from_selected_entity():
+            self.import_path = checksum_method_path
+            return self.import_translation
+        else:
+            return None
+
+
