@@ -14,8 +14,6 @@ import json
 from ingest.api.ingestapi import IngestApi
 import converter_helper_func
 from get_common_model_entity_metadata import fetch_entity_metadata_translation
-import copy
-
 
 def get_dss_generator(hca_project_uuid):
     # files.project_json.provenance.document_id project uuid you want to retreive
@@ -114,29 +112,19 @@ if __name__ == '__main__':
 
     # temp params
     hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
-
-
-    translation_config_file = 'temp_config.json'
-    # translation_config_file = 'mapping_HCA_to_datamodel.json'
-    # translation_config_file = 'temp_temp_conf.json'
-
-
-    with open(translation_config_file) as f:
-        translation_config = json.load(f)
-
-    # temp function to show hca coverage in config
-    # converter_helper_func.conf_coverage(translation_config_file)
+    # translation_config_file = 'temp_config.json'
+    translation_config_file = 'mapping_HCA_to_datamodel.json'
 
     # initialise
+    with open(translation_config_file) as f:
+        translation_config = json.load(f)
     get_generator = get_dss_generator(hca_project_uuid)
     res = get_generator[0]
     total_hits = get_generator[1]
     hca_entities = get_hca_entity_types()
-
     project_translated_output = {}
     detected_protocols = []
-    x = []
-
+    # converter_helper_func.conf_coverage(translation_config_file) # debug function to show hca coverage in config
 
     for bundle in res:
 
@@ -162,24 +150,21 @@ if __name__ == '__main__':
                     continue
                 else:
                     translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
-                    project_translated_output.update(translated_entity_metadata)
+                    project_translated_output[common_entity_type] = [translated_entity_metadata]
 
             elif entity_granularity == 'one_entity_per_hca_assay':
                 # always get then add to dict or create new entry
                 translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
                 if common_entity_type in project_translated_output:
-                    project_translated_output.get(common_entity_type).update(translated_entity_metadata.get(common_entity_type))
-                    # project_translated_output[common_entity_type] = {**project_translated_output.get(common_entity_type), **translated_entity_metadata}
+                    project_translated_output[common_entity_type].append(translated_entity_metadata)
                 else:
-                    # project_translated_output[common_entity_type] = translated_entity_metadata
-                    project_translated_output.update(translated_entity_metadata)
+                    project_translated_output[common_entity_type] = [translated_entity_metadata]
+
             elif entity_granularity == 'protocol_handling':
                 # check by alias first before grabbing all metadata. Skip if seen before.
                 assert common_entity_type == 'protocol', 'This handling is only for protocols'
-
-                if 'protocol' not in project_translated_output:
-                    project_translated_output['protocol'] = {}
-
+                if common_entity_type not in project_translated_output:
+                    project_translated_output[common_entity_type] = []
                 current_protocols = hca_entities.get(common_entity_type)
                 protocol_files = [a for b in [c for (d, c) in {e: f for (e, f) in metadata_files.items() if e in current_protocols}.items()] for a in b]
 
@@ -190,27 +175,11 @@ if __name__ == '__main__':
 
                     if protocol_alias not in detected_protocols:
                         detected_protocols.append(protocol_alias)
-
-                        # # augment config paths with specific protocol type
-                        # temp_translation_config = copy.deepcopy(translation_config)
-                        # for common_attribute_name, t in translation_config.get('protocol').items():
-                        #     hca_conf = t.get('import', None).get('hca', None)
-                        #     if hca_conf:
-                        #         path = hca_conf.get('path', None)
-                        #         assert path and isinstance(path, list), 'Missing path in config. See attribute: {}'.format(common_attribute_name)
-                        #         if path[0] == 'protocol_json':
-                        #             path[0] = file.get('describedBy').split('/')[-1] + '_json'
-
                         translated_entity_metadata = fetch_entity_metadata_translation(translation_params, protocol_uuid).translated_entity_metadata
-                        x.append(translated_entity_metadata.get('protocol')) # test
-                        # translation_config = copy.deepcopy(temp_translation_config)  # reset translation config prior to augmentation
-
-                        project_translated_output['protocol'].update(translated_entity_metadata.get('protocol'))
-
-
+                        project_translated_output['protocol'].append(translated_entity_metadata)
 
             elif entity_granularity == 'skip':
-                # nested entites are handled at the higher level when called by the config
+                # nested entities are handled at the higher level when called by the config
                 # also some entities aren't used for HCA data
                 continue
 
@@ -219,4 +188,3 @@ if __name__ == '__main__':
     with open('temp_out.json', 'w') as f:
         json.dump(project_translated_output, f)
     # print(project_translated_output)
-

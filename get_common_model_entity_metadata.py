@@ -42,7 +42,7 @@ class fetch_entity_metadata_translation:
             attribute_value_dict[self.common_attribute] = attribute_value
             # print('{} : {}'.format(self.common_attribute, attribute_value))
 
-        self.translated_entity_metadata = {self.common_entity_type:{attribute_value_dict.get('alias'):attribute_value_dict}} # alias is required
+        self.translated_entity_metadata = attribute_value_dict # alias is required
 
     # main get method
     def get_attribute_value(self):
@@ -71,7 +71,7 @@ class fetch_entity_metadata_translation:
         # follow path and return value
         assert len(self.import_path) > 0, 'Path is required to use this method. Please add one to the config for this attribute. See {}'.format(str(self.common_entity_type+ '.' + self.common_attribute))
         files = self.metadata_files.get(self.import_path[0])
-        assert files, 'File {} not found in bundle'.format(self.import_path[0])
+        assert files, 'File {} not found in bundle {}'.format(self.import_path[0], self.bundle_uuid)
         assert len(files) == 1, 'This method expects 1 file per bundle. Detected mutiple {} entities in bundle {}'.format(self.common_entity_type, self.bundle_uuid)
         value = files[0]
 
@@ -104,7 +104,9 @@ class fetch_entity_metadata_translation:
         for selected_entity in entities:
             self.selected_entity = selected_entity
             entity_metadata = {}
-            for common_attribute, t in self.translation_config.get(self.nested_entity_type).items():
+            nested_entity_translator_config = self.translation_config.get(self.nested_entity_type)
+            assert nested_entity_translator_config, 'Config missing nested entity describing {}'.format(self.nested_entity_type)
+            for common_attribute, t in nested_entity_translator_config.items():
                 if not t.get('import').get('hca', False): # skip fields without a hca entry
                     continue
                 self.common_attribute = common_attribute
@@ -116,7 +118,7 @@ class fetch_entity_metadata_translation:
                 # print('NESTED {} : {}'.format(common_attribute, attribute_value))
             nested_attributes_as_list.append(entity_metadata)
         self.common_attribute = self.nested_entity_type
-        return nested_attributes_as_list # todo maybe need to wrap up as dict with alias rather than use a list
+        return nested_attributes_as_list
 
     def placeholder(self):
         '''

@@ -1,120 +1,184 @@
 {
-  "protocol": {
+  "assay_data": {
     "alias": {
-      "description": "protocol accession or unique name in experiment",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["alias"],
+       "description": "unique name in the experiment (Assay Name in SDRF)",
+       "type": "string",
+       "import": {
+         "ae": {
+           "from_type": "string",
+           "parent": "assay_data",
+           "path": ["alias"],
+           "method": "import_string"
+         },
+         "hca": {
+          "path": [],
           "from_type": "string",
-          "method": "import_string"
-        },
-        "hca": {
-          "path": [
-            "protocol_core",
-            "protocol_id"],
-          "from_type": "string",
-          "method": "import_string_from_protocol"
+          "method": "get_hca_bundle_uuid"
         }
-      }
-    },
-    "accession":{
-      "description": "ArrayExpress protocol accession",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["accession"],
-          "from_type": "string",
-          "method": "import_string"
-        }
+       }
+     },
+    "files": {
+      "description": "list of DataFile class objects",
+      "type": "array",
+      "items": {
+        "$ref": "#/data_file"
       },
-      "hca": {
+      "import": {
+        "ae": {
+          "from_type": "array",
+          "parent": "assay_data",
           "path": [
-            "provenance",
-            "document_id"],
-          "from_type": "string",
-          "method": "import_string_from_protocol"
+            "files"
+          ],
+          "method": "import_file"
+        },
+        "hca": {
+          "path": [
+            "sequence_file_json"
+          ],
+          "from_type": "array",
+          "method": "import_nested_data_files"
         }
+      }
     },
-    "description": {
-      "description": "free-text description of protocol",
+    "data_type": {
+      "description": "raw or raw matrix",
       "type": "string",
       "import": {
         "ae": {
-          "path": ["description"],
           "from_type": "string",
+          "parent": "assay_data",
+          "path": [
+            "attributes",
+            "data_type"
+          ],
+          "method": "get_string_from_attribute"
+        },
+        "hca": {
+          "path": [],
+          "method": "use_translation",
+          "translation": "raw"
+        }
+      }
+    },
+    "assayrefs": {
+      "description": "assay name/accessions",
+      "type": "array",
+      "import": {
+        "ae": {
+          "from_type": "array",
+          "parent": "assay_data",
+          "path": [
+            "assayRefs"
+          ],
+          "method": "get_reference_value_from_json"
+        },
+        "hca": {
+          "path": [],
+          "method": "placeholder"
+        }
+      }
+    },
+    "accession": {
+      "description": "(not for microarray) ENA run accession",
+      "type": "string",
+      "import": {
+        "ae": {
+          "from_type": "string",
+          "parent": "assay_data",
+          "path": [
+            "accession"
+          ],
+          "method": "import_string"
+        }
+      }
+    }
+  },
+    "data_file": {
+    "name": {
+      "type": "string",
+      "import": {
+        "ae": {
+          "from_type": "string",
+          "path": [
+            "name"
+          ],
           "method": "import_string"
         },
         "hca": {
           "path": [
-            "protocol_core",
-            "protocol_description"],
+            "file_core",
+            "file_name"
+          ],
           "from_type": "string",
-          "method": "import_string_from_protocol"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
-    "protocol_type": {
-      "description": "experiment type ontology term",
-      "type": "attribute_object",
-      "import": {
-        "ae": {
-          "path": ["attributes", "protocol_type"],
-          "from_type": "array",
-          "method": "generate_attribute_from_json"
-        },
-        "hca": {
-          "path": [
-            "describedBy"],
-          "from_type": "string",
-          "method": "get_protocol_type"
-        }
-      }
-    },
-    "hardware": {
-      "description": "free-text hardware description, sequencer model for sequencing experiments",
+    "checksum": {
       "type": "string",
       "import": {
         "ae": {
-          "path": ["attributes", "hardware"],
           "from_type": "string",
-          "method": "get_string_from_attribute"
+          "path": [
+            "checksum"
+          ],
+          "method": "import_string"
         },
         "hca": {
           "path": [
-            "instrument_manufacturer_model",
-            "ontology_label"],
+            "file_core",
+            "checksum"
+          ],
           "from_type": "string",
-          "method": "import_string_from_protocol"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
-    "software":{
-      "description": "free-text software description",
+    "checksum_method": {
       "type": "string",
       "import": {
         "ae": {
-          "path": ["attributes", "software"],
           "from_type": "string",
+          "path": [
+            "checksumMethod"
+          ],
+          "method": "import_string"
+        },
+        "hca": {
+          "path": [],
+          "from_type": "string",
+          "method": "use_translation",
+          "translation": "MD5"
+        }
+      }
+    },
+    "ftp_location": {
+      "type": "string",
+      "import": {
+        "ae": {
+          "from_type": "string",
+          "path": [
+            "attributes",
+            "ftp_location"
+          ],
           "method": "get_string_from_attribute"
         }
       }
     },
-    "performer": {
-      "description": "performer of the protocol",
+    "read": {
+      "description": "The type of read for multiplexed single cell sequence files: read1/2 or index1/2",
       "type": "string",
       "import": {
         "ae": {
-          "path": ["attributes", "performer"],
-          "from_type": "string",
-          "method": "get_string_from_attribute"
+          "path": ["attributes", "read"]
         },
         "hca": {
           "path": [
-            "process_core",
-            "operators"],
+            "read_index"
+          ],
           "from_type": "string",
-          "method": "get_protocol_operator"
+          "method": "import_string_from_selected_entity"
         }
       }
     }

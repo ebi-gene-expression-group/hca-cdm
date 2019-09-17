@@ -387,11 +387,10 @@
         },
         "hca": {
           "path": [
-            "protocol_json",
             "protocol_core",
             "protocol_id"],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_protocol"
         }
       }
     },
@@ -407,11 +406,10 @@
       },
       "hca": {
           "path": [
-            "protocol_json",
             "provenance",
             "document_id"],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_protocol"
         }
     },
     "description": {
@@ -425,11 +423,10 @@
         },
         "hca": {
           "path": [
-            "protocol_json",
             "protocol_core",
             "protocol_description"],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_protocol"
         }
       }
     },
@@ -444,7 +441,6 @@
         },
         "hca": {
           "path": [
-            "protocol_json",
             "describedBy"],
           "from_type": "string",
           "method": "get_protocol_type"
@@ -462,10 +458,10 @@
         },
         "hca": {
           "path": [
-            "protocol_json",
-            "instrument_manufacturer_model"],
+            "instrument_manufacturer_model",
+            "ontology_label"],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_protocol"
         }
       }
     },
@@ -1865,7 +1861,7 @@
             "file_name"
           ],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
@@ -1885,7 +1881,7 @@
             "checksum"
           ],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
@@ -1932,7 +1928,7 @@
             "read_index"
           ],
           "from_type": "string",
-          "method": "import_string"
+          "method": "import_string_from_selected_entity"
         }
       }
     }
