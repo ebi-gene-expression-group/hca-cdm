@@ -4,6 +4,7 @@ __date__ = "30/08/2019"
 
 from collections import OrderedDict
 # todo maybe add one formatter func to remove [] and underscores?
+import networkx as nx
 
 class fetch_entity_metadata_translation:
     '''
@@ -12,9 +13,10 @@ class fetch_entity_metadata_translation:
     - No logic needed to catch duplicates, this is in the main script.
     - alias should be dict key and value should be dict of attributes e.g. {"sample":{"alias_of_sample":{ATTRIBUTES GO HERE}}}
     - special handling functions are built into the class
+    - metadata_file_index can be used to iterate through multiple hca entities.
     '''
 
-    def __init__(self, translation_params):
+    def __init__(self, translation_params, protocol_uuid=None):
 
 
         #initialize
@@ -26,14 +28,15 @@ class fetch_entity_metadata_translation:
         self.metadata_files_by_uuid = translation_params.get('metadata_files_by_uuid')
         self.translation_config = translation_params.get('translation_config')
         self.bundle_uuid = self.bundle.get('metadata').get('uuid')
-        print('WORKING ON ENITY TYPE: {}'.format(self.common_entity_type))
+        self.protocol_uuid = protocol_uuid
+        # print('WORKING ON ENITY TYPE: {}'.format(self.common_entity_type))
 
         attribute_value_dict = {}
         for common_attribute, t in self.attribute_translation.items():
             self.common_attribute = common_attribute
             self.t = t
 
-            print('WORKING ON ATTRIBUTE: {}'.format(self.common_attribute))
+            # print('WORKING ON ATTRIBUTE: {}'.format(self.common_attribute))
 
             attribute_value = self.get_attribute_value()
             attribute_value_dict[self.common_attribute] = attribute_value
@@ -70,8 +73,8 @@ class fetch_entity_metadata_translation:
         files = self.metadata_files.get(self.import_path[0])
         assert files, 'File {} not found in bundle'.format(self.import_path[0])
         assert len(files) == 1, 'This method expects 1 file per bundle. Detected mutiple {} entities in bundle {}'.format(self.common_entity_type, self.bundle_uuid)
-
         value = files[0]
+
         for level in self.import_path[1:]:
             if value:
                 value = value.get(level, None)
@@ -301,4 +304,32 @@ class fetch_entity_metadata_translation:
         else:
             return None
 
+    # Protocol Methods
 
+    def import_string_from_protocol(self):
+        # required to ensure strings are collected from selected protocol
+        self.selected_entity = self.metadata_files_by_uuid.get(self.protocol_uuid)
+        self.import_path = self.import_path
+        return self.import_string_from_selected_entity()
+
+    def get_protocol_type(self):
+        return self.import_string_from_protocol().split('/')[-1]
+
+    def get_protocol_operator(self):
+        # traverse graph from protocol to find metadata on process nodes
+        protocol_in_edges = list(self.bundle_graph.G.in_edges([self.protocol_uuid]))
+        process_in_nodes = set()
+        for edge in protocol_in_edges:
+            assert len(edge) == 2, 'Strange edge detected len != 2'
+            for node in edge:
+                if node != self.protocol_uuid:
+                    process_in_nodes.add(node)
+
+        operators = []
+        for process in process_in_nodes:
+            self.selected_entity = self.metadata_files_by_uuid.get(process)
+            operators.append(self.import_string_from_selected_entity())
+        if len(operators) > 1:
+            return ', '.join(operators)
+        else:
+            return operators[0]

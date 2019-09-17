@@ -384,6 +384,14 @@
           "path": ["alias"],
           "from_type": "string",
           "method": "import_string"
+        },
+        "hca": {
+          "path": [
+            "protocol_json",
+            "protocol_core",
+            "protocol_id"],
+          "from_type": "string",
+          "method": "import_string"
         }
       }
     },
@@ -396,7 +404,15 @@
           "from_type": "string",
           "method": "import_string"
         }
-      }
+      },
+      "hca": {
+          "path": [
+            "protocol_json",
+            "provenance",
+            "document_id"],
+          "from_type": "string",
+          "method": "import_string"
+        }
     },
     "description": {
       "description": "free-text description of protocol",
@@ -404,6 +420,14 @@
       "import": {
         "ae": {
           "path": ["description"],
+          "from_type": "string",
+          "method": "import_string"
+        },
+        "hca": {
+          "path": [
+            "protocol_json",
+            "protocol_core",
+            "protocol_description"],
           "from_type": "string",
           "method": "import_string"
         }
@@ -417,6 +441,13 @@
           "path": ["attributes", "protocol_type"],
           "from_type": "array",
           "method": "generate_attribute_from_json"
+        },
+        "hca": {
+          "path": [
+            "protocol_json",
+            "describedBy"],
+          "from_type": "string",
+          "method": "get_protocol_type"
         }
       }
     },
@@ -428,6 +459,13 @@
           "path": ["attributes", "hardware"],
           "from_type": "string",
           "method": "get_string_from_attribute"
+        },
+        "hca": {
+          "path": [
+            "protocol_json",
+            "instrument_manufacturer_model"],
+          "from_type": "string",
+          "method": "import_string"
         }
       }
     },
@@ -450,6 +488,13 @@
           "path": ["attributes", "performer"],
           "from_type": "string",
           "method": "get_string_from_attribute"
+        },
+        "hca": {
+          "path": [
+            "process_core",
+            "operators"],
+          "from_type": "string",
+          "method": "get_protocol_operator"
         }
       }
     }

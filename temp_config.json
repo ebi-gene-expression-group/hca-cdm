@@ -1,173 +1,4 @@
 {
-  "sequencing_assay": {
-    "alias": {
-      "description": "unique name of the assay",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "assay",
-          "path": [
-            "alias"
-          ],
-          "from_type": "string",
-          "method": "import_string"
-        }
-      }
-    },
-    "accession": {
-      "description": "ENA experiment accession",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["accession"],
-          "method": "import_string"
-        }
-      }
-    },
-    "technology_type": {
-      "description": "array assay or sequencing assay",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "assay",
-          "path": [
-            "attributes",
-            "technology_type"
-          ],
-          "from_type": "string",
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "protocolrefs": {
-      "description": "protocol accessions/name used to generate assay data",
-      "type": "array",
-      "import": {
-        "ae": {
-          "parent": "assay",
-          "path": [
-            "protocolUses"
-          ],
-          "from_type": "array",
-          "method": "get_reference_usage"
-        }
-      }
-    },
-    "sampleref": {
-      "description": "sample accession/name",
-      "type": "string",
-      "import": {
-        "ae": {
-          "parent": "assay",
-          "path": [
-            "sampleUses"
-          ],
-          "from_type": "array",
-          "method": "get_reference_usage"
-        }
-      }
-    },
-    "library_layout": {
-      "description": "The layout of the sequencing library, SINGLE or PAIRED.",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "library_layout"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "library_source": {
-      "description": "The source material of the sequencing library, e.g. TRANSCRIPTOMIC.",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "library_source"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "library_strategy": {
-      "description": "The type of sequencing approach, e.g. RNA-Seq.",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "library_strategy"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "library_selection": {
-      "description": "The selection strategy of the faction of nucleic acid that was sequenced.",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "library_selection"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "nominal_length": {
-      "description": "Nominal length, i.e. length of the insert",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "nominal_length"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "nominal_sdev": {
-      "description": "standard deviation of the nominal length",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "nominal_sdev"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "orientation": {
-      "description": "for paired-end, the orientation of the two reads in the sequence file",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "orientation"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "platform_type": {
-      "description": "manufacturer of the sequencing machine",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "platform_type"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "instrument_model": {
-      "description": "sequencer model",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "instrument_model"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    },
-    "library_strand": {
-      "description": "the strand that is being sequenced in directional RNA-seq",
-      "type": "string",
-      "import": {
-        "ae": {
-          "path": ["attributes", "library_strand"],
-          "method": "get_string_from_attribute"
-        }
-      }
-    }
-  },
   "protocol": {
     "alias": {
       "description": "protocol accession or unique name in experiment",
@@ -177,6 +8,13 @@
           "path": ["alias"],
           "from_type": "string",
           "method": "import_string"
+        },
+        "hca": {
+          "path": [
+            "protocol_core",
+            "protocol_id"],
+          "from_type": "string",
+          "method": "import_string_from_protocol"
         }
       }
     },
@@ -189,7 +27,14 @@
           "from_type": "string",
           "method": "import_string"
         }
-      }
+      },
+      "hca": {
+          "path": [
+            "provenance",
+            "document_id"],
+          "from_type": "string",
+          "method": "import_string_from_protocol"
+        }
     },
     "description": {
       "description": "free-text description of protocol",
@@ -199,6 +44,13 @@
           "path": ["description"],
           "from_type": "string",
           "method": "import_string"
+        },
+        "hca": {
+          "path": [
+            "protocol_core",
+            "protocol_description"],
+          "from_type": "string",
+          "method": "import_string_from_protocol"
         }
       }
     },
@@ -210,6 +62,12 @@
           "path": ["attributes", "protocol_type"],
           "from_type": "array",
           "method": "generate_attribute_from_json"
+        },
+        "hca": {
+          "path": [
+            "describedBy"],
+          "from_type": "string",
+          "method": "get_protocol_type"
         }
       }
     },
@@ -221,6 +79,13 @@
           "path": ["attributes", "hardware"],
           "from_type": "string",
           "method": "get_string_from_attribute"
+        },
+        "hca": {
+          "path": [
+            "instrument_manufacturer_model",
+            "ontology_label"],
+          "from_type": "string",
+          "method": "import_string_from_protocol"
         }
       }
     },
@@ -243,6 +108,13 @@
           "path": ["attributes", "performer"],
           "from_type": "string",
           "method": "get_string_from_attribute"
+        },
+        "hca": {
+          "path": [
+            "process_core",
+            "operators"],
+          "from_type": "string",
+          "method": "get_protocol_operator"
         }
       }
     }
