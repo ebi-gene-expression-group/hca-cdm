@@ -4,16 +4,14 @@ __date__ = "30/08/2019"
 
 from collections import OrderedDict
 # todo maybe add one formatter func to remove [] and underscores?
-import networkx as nx
 
 class fetch_entity_metadata_translation:
     '''
-    - func should return 1 dict for 1 common datamodel entity which can then be added to the project translated output
-    by the main script
+    - class should return 1 dict for 1 common datamodel entity which can then be added to the project translated output
+    by the main script. This may include a list of nested entities within the top entity.
     - No logic needed to catch duplicates, this is in the main script.
     - alias should be dict key and value should be dict of attributes e.g. {"sample":{"alias_of_sample":{ATTRIBUTES GO HERE}}}
-    - special handling functions are built into the class
-    - metadata_file_index can be used to iterate through multiple hca entities.
+    - special handling functions are built into the class (see bottom)
     '''
 
     def __init__(self, translation_params, protocol_uuid=None):
@@ -31,6 +29,8 @@ class fetch_entity_metadata_translation:
         self.protocol_uuid = protocol_uuid
         # print('WORKING ON ENITY TYPE: {}'.format(self.common_entity_type))
 
+        self.links = {self.common_entity_type : []}
+
         attribute_value_dict = {}
         for common_attribute, t in self.attribute_translation.items():
             self.common_attribute = common_attribute
@@ -41,6 +41,9 @@ class fetch_entity_metadata_translation:
             attribute_value = self.get_attribute_value()
             attribute_value_dict[self.common_attribute] = attribute_value
             # print('{} : {}'.format(self.common_attribute, attribute_value))
+
+            if common_attribute == 'alias':
+                self.links[self.common_entity_type].append(attribute_value)
 
         self.translated_entity_metadata = attribute_value_dict # alias is required
 
@@ -65,8 +68,8 @@ class fetch_entity_metadata_translation:
         attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
         return attribute_value
 
-
     # General Methods
+
     def import_string(self):
         # follow path and return value
         assert len(self.import_path) > 0, 'Path is required to use this method. Please add one to the config for this attribute. See {}'.format(str(self.common_entity_type+ '.' + self.common_attribute))
@@ -120,15 +123,6 @@ class fetch_entity_metadata_translation:
         self.common_attribute = self.nested_entity_type
         return nested_attributes_as_list
 
-    def placeholder(self):
-        '''
-        Some entries (e.g. protocolrefs "protocol accessions/name used in the study")
-        require a whole project search which can only be performed at the end of the loop.
-        This method adds a placeholder marking the method for update after the fact.
-        todo add ability to build after the fact
-        '''
-        return str(self.common_attribute) + '_PLACEHOLDER'
-
     def use_translation(self):
         # this method relies ont he translation field in the config to perform value manipulation.
         assert self.import_translation != None, 'This method requires a translation string or dict in the config file.'
@@ -142,7 +136,6 @@ class fetch_entity_metadata_translation:
             # Stop if mapping not found. Expects all values be in translation dict even if unchanged. The behaivor may need to change in the future.
             assert value_translation != 'NOT FOUND', 'Value "{}" is not in the config dict and cannot be converted. See {}'.format(value, str(self.common_entity_type+ '.' + self.common_attribute))
             return value_translation
-
 
     # Project Methods
     def import_nested_publications(self):
@@ -335,3 +328,9 @@ class fetch_entity_metadata_translation:
             return ', '.join(operators)
         else:
             return operators[0]
+
+    # Entity Linking Methods
+
+    def placeholder(self):
+        # temp method for handling linking fields
+        return str(self.common_attribute) + '_PLACEHOLDER'

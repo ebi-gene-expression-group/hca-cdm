@@ -14,6 +14,9 @@ import json
 from ingest.api.ingestapi import IngestApi
 import converter_helper_func
 from get_common_model_entity_metadata import fetch_entity_metadata_translation
+from collections import defaultdict
+import re
+import sys
 
 def get_dss_generator(hca_project_uuid):
     # files.project_json.provenance.document_id project uuid you want to retreive
@@ -112,7 +115,6 @@ if __name__ == '__main__':
 
     # temp params
     hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
-    # translation_config_file = 'temp_config.json'
     translation_config_file = 'mapping_HCA_to_datamodel.json'
 
     # initialise
@@ -122,19 +124,29 @@ if __name__ == '__main__':
     res = get_generator[0]
     total_hits = get_generator[1]
     hca_entities = get_hca_entity_types()
-    project_translated_output = {}
+    project_translated_output = defaultdict(list)
     detected_protocols = []
     # converter_helper_func.conf_coverage(translation_config_file) # debug function to show hca coverage in config
 
+    assay_links = defaultdict(list) # used to provide links in current selected assay
+
+
     for bundle in res:
+
+        # initialize bundle
 
         bundle_graph = converter_helper_func.bundle_info(bundle)
         metadata_files = bundle.get('metadata').get('files')
         metadata_files_by_uuid = get_metadata_files_by_uuid(metadata_files)
         # check_bundle_assumptions(hca_schemas) # todo turn on after testing
 
+        bundle_links = defaultdict(list)
+        translated_bundle_metadata = defaultdict(list)
+
+        # get metadata for a bundle
+
         for common_entity_type, attribute_translation in translation_config.items():
-            entity_granularity =  get_entity_granularity(common_entity_type)
+            entity_granularity = get_entity_granularity(common_entity_type)
             translation_params = {
                             'bundle': bundle,
                             'common_entity_type' : common_entity_type,
@@ -149,39 +161,67 @@ if __name__ == '__main__':
                 if common_entity_type in project_translated_output: # skip if already there
                     continue
                 else:
-                    translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
-                    project_translated_output[common_entity_type] = [translated_entity_metadata]
+                    common_modelling = fetch_entity_metadata_translation(translation_params)
+                    translated_entity_metadata = common_modelling.translated_entity_metadata
+                    translated_bundle_metadata[common_entity_type] = [translated_entity_metadata]
+                    alias = translated_entity_metadata.get('alias')
+                    bundle_links[common_entity_type] += [alias]
 
             elif entity_granularity == 'one_entity_per_hca_assay':
                 # always get then add to dict or create new entry
-                translated_entity_metadata = fetch_entity_metadata_translation(translation_params).translated_entity_metadata
-                if common_entity_type in project_translated_output:
-                    project_translated_output[common_entity_type].append(translated_entity_metadata)
-                else:
-                    project_translated_output[common_entity_type] = [translated_entity_metadata]
+                common_modelling = fetch_entity_metadata_translation(translation_params)
+                translated_entity_metadata = common_modelling.translated_entity_metadata
+                translated_bundle_metadata[common_entity_type].append(translated_entity_metadata)
+                alias = translated_entity_metadata.get('alias')
+                bundle_links[common_entity_type] += [alias]
+
 
             elif entity_granularity == 'protocol_handling':
                 # check by alias first before grabbing all metadata. Skip if seen before.
                 assert common_entity_type == 'protocol', 'This handling is only for protocols'
                 if common_entity_type not in project_translated_output:
-                    project_translated_output[common_entity_type] = []
+                    translated_bundle_metadata[common_entity_type] = []
                 current_protocols = hca_entities.get(common_entity_type)
                 protocol_files = [a for b in [c for (d, c) in {e: f for (e, f) in metadata_files.items() if e in current_protocols}.items()] for a in b]
 
                 for file in protocol_files:
                     protocol_alias = file.get('protocol_core', None).get('protocol_id', None)
                     protocol_uuid = file.get('provenance').get('document_id')
+                    bundle_links[common_entity_type] += [protocol_alias] # save link
                     assert protocol_alias, 'Hard coded assumption failed to find protocol alias. Quick fix needed.'
 
                     if protocol_alias not in detected_protocols:
                         detected_protocols.append(protocol_alias)
-                        translated_entity_metadata = fetch_entity_metadata_translation(translation_params, protocol_uuid).translated_entity_metadata
-                        project_translated_output['protocol'].append(translated_entity_metadata)
+                        common_modelling = fetch_entity_metadata_translation(translation_params, protocol_uuid)
+                        translated_entity_metadata = common_modelling.translated_entity_metadata
+                        translated_bundle_metadata['protocol'].append(translated_entity_metadata)
 
             elif entity_granularity == 'skip':
                 # nested entities are handled at the higher level when called by the config
                 # also some entities aren't used for HCA data
                 continue
+
+        # save links for the selected assay
+        for common_entity_type, links in bundle_links.items():
+            entity_granularity = get_entity_granularity(common_entity_type)
+            if entity_granularity == 'one_entity_per_project': # add to
+                assay_links[common_entity_type] += links
+            elif entity_granularity == 'one_entity_per_hca_assay' or 'protocol_handling': # overwrite
+                assay_links[common_entity_type] = links
+
+        # replace placeholders with links
+        # NOTE nested entities are not checked
+        for entity_type, entities in translated_bundle_metadata.items():
+            for entity in entities:
+                for attribute_name, attribute_value in entity.items():
+                    if isinstance(attribute_value, str) and attribute_value.endswith('_PLACEHOLDER'):
+                        link_to_type = re.sub(r"refs?$", '', attribute_name)
+                        entity.update({attribute_name : assay_links.get(link_to_type)})
+
+
+        # add bundle metadata to project metadata
+        for entity_type, entities in translated_bundle_metadata.items():
+            project_translated_output[entity_type] += entities
 
     # temp writing out json for inspection
     import json

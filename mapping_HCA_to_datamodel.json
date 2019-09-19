@@ -955,6 +955,24 @@
         }
       }
     },
+    "studyref": {
+      "description": "study accession/name",
+      "type": "string",
+      "import": {
+        "ae": {
+          "parent": "assay",
+          "path": [
+            "studyUses"
+          ],
+          "from_type": "array",
+          "method": "get_reference_usage"
+        },
+        "hca": {
+          "path": [],
+          "method": "placeholder"
+        }
+      }
+    },
     "library_layout": {
       "description": "The layout of the sequencing library, SINGLE or PAIRED.",
       "type": "string",

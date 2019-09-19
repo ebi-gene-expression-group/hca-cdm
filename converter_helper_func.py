@@ -78,7 +78,3 @@ def conf_coverage(translation_config_file):
             config_summary[attribute_name] = hca_mapped
     # print('{} attributes in config'.format(len(config_summary)))
     print('{}/{} attributes have hca mapping'.format(hca_mapped_counter, len(config_summary)))
-
-
-
-
