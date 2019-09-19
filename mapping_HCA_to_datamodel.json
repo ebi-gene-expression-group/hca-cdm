@@ -1161,9 +1161,7 @@
           ],
           "from_type": "string",
           "method": "use_translation",
-          "translation" : {
-            "fluorescence-activated cell sorting" : "FACS",
-            "10X v2 sequencing" : ""
+          "translation" : {"fluorescence-activated cell sorting" : "FACS", "10X v2 sequencing" : "null"
           }
         }
       }

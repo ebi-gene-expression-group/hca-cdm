@@ -218,7 +218,6 @@ if __name__ == '__main__':
                         link_to_type = re.sub(r"refs?$", '', attribute_name)
                         entity.update({attribute_name : assay_links.get(link_to_type)})
 
-
         # add bundle metadata to project metadata
         for entity_type, entities in translated_bundle_metadata.items():
             project_translated_output[entity_type] += entities

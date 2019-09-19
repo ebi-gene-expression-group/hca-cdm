@@ -55,6 +55,8 @@ class fetch_entity_metadata_translation:
         # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
         self.import_path = self.t.get('import').get('hca').get('path')
         self.import_translation = self.t.get('import').get('hca').get('translation', None)
+        if isinstance(self.import_translation, dict):
+            self.import_translation.update({a: None for a, b in self.import_translation.items() if b == 'null'}) # JSON doesn't support None
         assert self.import_path or self.import_path == [], 'Missing import_path in config for attribute {}'.format(
             self.common_entity_type + '.' + self.common_attribute)
         # CONFIG REQUIRED used by converter to do all translations
@@ -332,5 +334,5 @@ class fetch_entity_metadata_translation:
     # Entity Linking Methods
 
     def placeholder(self):
-        # temp method for handling linking fields
+        # back filled in with linking fields
         return str(self.common_attribute) + '_PLACEHOLDER'
