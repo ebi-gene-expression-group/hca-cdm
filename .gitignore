@@ -1,4 +1,5 @@
 venv/
+lib/log/
 .idea/
 __pycache__/
 temp_out.json
