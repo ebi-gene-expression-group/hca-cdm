@@ -113,9 +113,7 @@ def convert(hca_project_uuid, translation_config_file):
     # initialise
     with open(translation_config_file) as f:
         translation_config = json.load(f)
-    get_generator = get_dss_generator(hca_project_uuid)
-    res = get_generator[0]
-    total_hits = get_generator[1]
+    res, total_hits = get_dss_generator(hca_project_uuid)
     hca_entities = get_hca_entity_types()
     project_translated_output = defaultdict(list)
     detected_protocols = []
@@ -216,5 +214,5 @@ def convert(hca_project_uuid, translation_config_file):
             project_translated_output[entity_type] += entities
 
     # temp writing out json for inspection
-    with open('log/' + hca_project_uuid + '.common_format.json', 'w') as f:
+    with open('lib/log/' + hca_project_uuid + '.common_format.json', 'w') as f:
         json.dump(project_translated_output, f)

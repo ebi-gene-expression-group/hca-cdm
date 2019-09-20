@@ -19,11 +19,14 @@ Config allows:
 
 
 ### Things to do pre v1
-- add argparse arguments to importer.py
+
 - implement logging and warnings to check conversion quality
 - Common data model also has an attribute/ontology object type and a unit object type that should be used when appropriate.
 - Review fields left over (not on sample extra entities) and produce a list for curators to review to see if we need to bolster the Atlas schema.
 - Double check the config that all have path and import method. The type may or may not be needed but should be all in or out at the end.
+- add argparse arguments to importer.py
+
+
 
 #### New side modules
 - automatically update the config based on metadata versions attached to data in DSS

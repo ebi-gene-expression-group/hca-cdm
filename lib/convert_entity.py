@@ -3,6 +3,7 @@ __license__ = "Apache 2.0"
 __date__ = "30/08/2019"
 
 from collections import OrderedDict
+import sys
 # todo maybe add one formatter func to remove [] and underscores?
 
 class fetch_entity_metadata_translation:
@@ -326,10 +327,15 @@ class fetch_entity_metadata_translation:
         operators = []
         for process in process_in_nodes:
             self.selected_entity = self.metadata_files_by_uuid.get(process)
-            operators.append(self.import_string_from_selected_entity())
+            operator = self.import_string_from_selected_entity()
+            if operator:
+                operators.append(self.import_string_from_selected_entity())
         if len(operators) > 1:
             return ', '.join(operators)
+        elif len(operators) == 0:
+            return None
         else:
+            assert len(operators) == 1, 'Function logic is failing'
             return operators[0]
 
     # Entity Linking Methods
