@@ -1161,7 +1161,12 @@
           ],
           "from_type": "string",
           "method": "use_translation",
-          "translation" : {"fluorescence-activated cell sorting" : "FACS", "10X v2 sequencing" : "null"
+          "translation" : {
+            "fluorescence-activated cell sorting" : "FACS",
+            "10X v2 sequencing" : "null",
+            "enzymatic dissociation" : "enzymatic dissociation",
+            "mechanical dissociation" : "mechanical dissociation",
+            "None" : "null"
           }
         }
       }
@@ -1626,7 +1631,7 @@
             "title"
           ],
           "from_type": "string",
-          "method": "import_nested_publications"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
@@ -1644,7 +1649,7 @@
             "authors"
           ],
           "from_type": "string",
-          "method": "import_nested_publications"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
@@ -1662,7 +1667,7 @@
             "pmid"
           ],
           "from_type": "string",
-          "method": "import_nested_publications"
+          "method": "import_string_from_selected_entity"
         }
       }
     },
@@ -1680,7 +1685,7 @@
             "doi"
           ],
           "from_type": "string",
-          "method": "import_nested_publications"
+          "method": "import_string_from_selected_entity"
         }
       }
     },

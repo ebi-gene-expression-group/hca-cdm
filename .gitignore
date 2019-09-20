@@ -1,5 +1,4 @@
 venv/
 .idea/
 __pycache__/
-notes
 temp_out.json

@@ -76,7 +76,10 @@ class fetch_entity_metadata_translation:
         # follow path and return value
         assert len(self.import_path) > 0, 'Path is required to use this method. Please add one to the config for this attribute. See {}'.format(str(self.common_entity_type+ '.' + self.common_attribute))
         files = self.metadata_files.get(self.import_path[0])
-        assert files, 'File {} not found in bundle {}'.format(self.import_path[0], self.bundle_uuid)
+        if not files:
+            # todo log things that can't be found here as a warning rather than blocking the conversion
+            return None
+        # assert files, 'File {} not found in bundle {}'.format(self.import_path[0], self.bundle_uuid)
         assert len(files) == 1, 'This method expects 1 file per bundle. Detected mutiple {} entities in bundle {}'.format(self.common_entity_type, self.bundle_uuid)
         value = files[0]
 
@@ -144,8 +147,6 @@ class fetch_entity_metadata_translation:
         self.nested_entity_type = 'publication'
         entities = self.import_string()
         return self.import_nested(entities)
-        # todo check when I have an example bundle with a publication
-        # todo add method for status
 
     def import_nested_contacts(self):
         self.nested_entity_type = 'contact'
