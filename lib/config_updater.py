@@ -22,6 +22,9 @@ class augment_config:
         property_migrations_file_url = 'https://raw.githubusercontent.com/HumanCellAtlas/metadata-schema/master/json_schema/property_migrations.json'
         filename, headers = urllib.request.urlretrieve(property_migrations_file_url,
                                                        filename='etc/property_migrations.json')
+
+
+
         with open(filename) as f2:
             self.property_migrations = json.load(f2)
 
@@ -36,13 +39,21 @@ class augment_config:
     def run_query(self):
         # auth issues, waiting for response from query service.
 
+        # url = "https://query.staging.data.humancellatlas.org/v1/"
+        # querystring = {"Accept": "application/json", "Content-Type": "application/json"}
+        # payload = "{\n  \"params\": {},\n  \"query\": \"SELECT fqid FROM BUNDLES LIMIT 10;\"\n}"
+        # headers = {
+        #     'Content-Type': "text/plain",
+        #     'Accept': "*/*",
+        #     'Host': "query.staging.data.humancellatlas.org",
+        # }
+        # response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+        # return response.text
+
+        query = 'SELECT fqid FROM BUNDLES LIMIT 10;'
         url = "https://query.staging.data.humancellatlas.org/v1/"
-        querystring = {"Accept": "application/json", "Content-Type": "application/json"}
-        payload = "{\n  \"params\": {},\n  \"query\": \"SELECT fqid FROM BUNDLES LIMIT 10;\"\n}"
-        headers = {
-            'Content-Type': "text/plain",
-            'Accept': "*/*",
-            'Host': "query.staging.data.humancellatlas.org",
-        }
-        response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
-        return response.text
+
+        data = json.dumps({'query': query})
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, headers=headers, data=data, allow_redirects=False)
+        print(response)

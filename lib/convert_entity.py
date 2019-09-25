@@ -50,7 +50,9 @@ class fetch_entity_metadata_translation:
 
     # main get method
     def get_attribute_value(self):
-        if self.t.get('import', None).get('hca', None) == None: # if 'hca' is missing in config, return None (e.g. hca doesn't have fax attribute)
+        if self.t.get('import', None) == None:
+            return
+        elif self.t.get('import', None).get('hca', None) == None: # if 'hca' is missing in config, return None (e.g. hca doesn't have fax attribute)
             return
 
         # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
@@ -210,14 +212,19 @@ class fetch_entity_metadata_translation:
         def list_handler(in_list):
             condensed_value = []
             for entry in in_list:
-                if isinstance(entry, dict) and 'ontology' in entry:
-                    ontology = entry.get('ontology', None)
-                    condensed_value.append(ontology)
+                if isinstance(entry, dict) and any(a in entry for a in ['ontology', 'text', 'ontology_label']):
+                    value = entry.get('ontology', None)
+                    if not value:
+                        value = entry.get('text', None)
+                    condensed_value.append(value)
                 elif isinstance(entry, (int, str)):
                     condensed_value.append(entry)
                 else:
-                    raise Exception('Data type not yet supported at this level. Update the parser to include {}'.format(
-                        type(entry)))
+                    # raise Exception('Data type not yet supported at this level. Update the parser to include {}'.format(
+                    #     type(entry)))
+                    # todo change this exception to a warning in logs
+                    condensed_value = None
+
             return condensed_value
 
         extra_attributes = OrderedDict()

@@ -14,6 +14,7 @@ from lib.convert_entity import fetch_entity_metadata_translation
 from collections import defaultdict
 import re
 import json
+import urllib
 
 def get_dss_generator(hca_project_uuid):
     # files.project_json.provenance.document_id project uuid you want to retreive
@@ -111,8 +112,10 @@ def get_entity_granularity(common_entity_type):
 def convert(hca_project_uuid, translation_config_file):
 
     # initialise
-    with open(translation_config_file) as f:
+    filename, headers = urllib.request.urlretrieve(translation_config_file, filename='etc/translation_config.json')
+    with open(filename) as f:
         translation_config = json.load(f)
+
     res, total_hits = get_dss_generator(hca_project_uuid)
     hca_entities = get_hca_entity_types()
     project_translated_output = defaultdict(list)
