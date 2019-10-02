@@ -108,7 +108,7 @@
     "publications": {
       "description": "list of Publication class objects",
       "type": "array",
-      "items": "Publication",
+      "items": "publication",
       "import": {
         "ae": {
           "path": ["publications"],
@@ -127,7 +127,7 @@
     "contacts": {
       "description": "list of Contact class objects",
       "type": "array",
-      "items": "Contact",
+      "items": "contact",
       "import": {
         "ae": {
           "path": ["contacts"],
@@ -234,7 +234,7 @@
     "experimental_factor": {
       "description": "list of experimental factors as Attribute class objects",
       "type": "array",
-      "items": "Attribute",
+      "items": "attribute",
       "import": {
         "ae": {
           "path": [
@@ -249,7 +249,7 @@
     "experimental_design": {
       "description": "(optional) list of experimental designs as Attribute class objects",
       "type": "array",
-      "items": "Attribute",
+      "items": "attribute",
       "import": {
         "ae": {
           "path": [
@@ -1510,7 +1510,7 @@
     "files": {
       "description": "list of DataFile class objects",
       "type": "array",
-      "items": "DataFile",
+      "items": "data_file",
       "import": {
         "ae": {
           "from_type": "array",
@@ -1609,7 +1609,7 @@
     "files": {
       "description": "list of DataFile class objects",
       "type": "array",
-      "items": "DataFile",
+      "items": "data_file",
       "import": {
         "ae": {
           "from_type": "array",
@@ -1980,6 +1980,50 @@
           "method": "import_string_from_selected_entity"
         }
       }
+    }
+  },
+  "attribute": {
+    "value": {
+      "description": "attribute value, e.g. ontology label",
+      "type": "string",
+      "import": {}
+    },
+    "unit": {
+      "description": "unit object to describe unit value and ontology term",
+      "type": "unit",
+      "import": {}
+    },
+    "term_source": {
+      "description": "the source ontology of the term",
+      "type": "string",
+      "import": {}
+    },
+    "term_accession": {
+      "description": "the ontology ID of the term",
+      "type": "string",
+      "import": {}
+    }
+  },
+  "unit": {
+    "value": {
+      "description": "the unit term, e.g. hour",
+      "type": "string",
+      "import": {}
+    },
+    "unit_type": {
+      "description": "the type of unit, e.g. time unit",
+      "type": "string",
+      "import": {}
+    },
+    "term_source": {
+      "description": "the source ontology of the unit term",
+      "type": "string",
+      "import": {}
+    },
+    "term_accession": {
+      "description": "the ontology ID of the unit term",
+      "type": "string",
+      "import": {}
     }
   }
 }

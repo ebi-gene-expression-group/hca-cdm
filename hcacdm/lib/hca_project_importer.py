@@ -9,8 +9,8 @@ __date__ = "30/08/2019"
 
 from hca.dss import DSSClient
 from ingest.api.ingestapi import IngestApi
-import lib.aux_func as aux_func
-from lib.convert_entity import fetch_entity_metadata_translation
+import hcacdm.lib.aux_func as aux_func
+from hcacdm.lib.convert_entity import fetch_entity_metadata_translation
 from collections import defaultdict
 import re
 import json
@@ -120,14 +120,18 @@ def get_entity_granularity(common_entity_type):
                  'microarray_assay': 'skip',
                  'sequencing_assay': 'skip',
                  'data_file': 'skip',
-                 'protocol': 'protocol_handling'}
+                 'protocol': 'protocol_handling',
+                 'attribute': 'skip',
+                 'unit': 'skip'}
     assert common_entity_type in granularity, "{} is an unrecognised entity type. Add to the granularity dict in code.".format(common_entity_type)
     return granularity.get(common_entity_type)
 
 def convert(hca_project_uuid, translation_config_file):
 
     # initialise
-    filename, headers = urllib.request.urlretrieve(translation_config_file, filename='hcacdm/etc/translation_config.json')
+    # filename, headers = urllib.request.urlretrieve(translation_config_file, filename='hcacdm/etc/translation_config.json')
+    filename = 'hcacdm/etc/translation_config.json' # temp for local testing
+
     with open(filename) as f:
         translation_config = json.load(f)
 
@@ -232,6 +236,7 @@ def convert(hca_project_uuid, translation_config_file):
         # add bundle metadata to project metadata
         for entity_type, entities in translated_bundle_metadata.items():
             project_translated_output[entity_type] += entities
+
 
     # temp writing out json for inspection
     with open('hcacdm/lib/log/' + hca_project_uuid + '.common_format.json', 'w+') as f:

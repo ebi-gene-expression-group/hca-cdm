@@ -11,7 +11,7 @@ __date__ = "20/09/2019"
 
 import json
 import urllib.request
-from lib.hca_project_importer import get_dss_generator
+from hcacdm.lib.hca_project_importer import get_dss_generator
 import sys
 import requests
 
