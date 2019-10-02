@@ -15,6 +15,7 @@ from collections import defaultdict
 import re
 import json
 import urllib
+import sys
 
 def get_dss_generator(hca_project_uuid):
     # files.project_json.provenance.document_id project uuid you want to retreive
@@ -91,6 +92,20 @@ def get_metadata_files_by_uuid(metadata_files):
                 metadata_files_by_uuid[uuid] = file
     return metadata_files_by_uuid
 
+def config_entity_types(translation_config):
+    # informational function to show the types of objects needed in the common data model read from the config.
+
+    conf_types = set()
+    for entity, i in translation_config.items():
+        for attribute, v in i.items():
+            try:
+                conf_types.add(v['type'])
+                if v['type'] =='attribute_object':
+                    print(entity + '.' + attribute)
+            except KeyError:
+                continue
+    return conf_types
+
 def get_entity_granularity(common_entity_type):
     # common data model, hardcoded granularity assumptions not part of config at this time
 
@@ -115,6 +130,8 @@ def convert(hca_project_uuid, translation_config_file):
     filename, headers = urllib.request.urlretrieve(translation_config_file, filename='etc/translation_config.json')
     with open(filename) as f:
         translation_config = json.load(f)
+
+    # print('Types defined in the config: {}'.format(config_entity_types(translation_config)))
 
     res, total_hits = get_dss_generator(hca_project_uuid)
     hca_entities = get_hca_entity_types()
