@@ -1,6 +1,6 @@
 venv/
-lib/log/
+hcacdm/lib/log/
 .idea/
 __pycache__/
-temp_out.json
-etc/
+hcacdm/temp_out.json
+hcacdm/etc/

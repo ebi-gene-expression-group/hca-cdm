@@ -127,7 +127,7 @@ def get_entity_granularity(common_entity_type):
 def convert(hca_project_uuid, translation_config_file):
 
     # initialise
-    filename, headers = urllib.request.urlretrieve(translation_config_file, filename='etc/translation_config.json')
+    filename, headers = urllib.request.urlretrieve(translation_config_file, filename='hcacdm/etc/translation_config.json')
     with open(filename) as f:
         translation_config = json.load(f)
 
@@ -234,5 +234,5 @@ def convert(hca_project_uuid, translation_config_file):
             project_translated_output[entity_type] += entities
 
     # temp writing out json for inspection
-    with open('lib/log/' + hca_project_uuid + '.common_format.json', 'w') as f:
+    with open('hcacdm/lib/log/' + hca_project_uuid + '.common_format.json', 'w+') as f:
         json.dump(project_translated_output, f)
