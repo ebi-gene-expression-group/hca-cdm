@@ -11,11 +11,12 @@ from hca.dss import DSSClient
 from ingest.api.ingestapi import IngestApi
 import hcacdm.lib.aux_func as aux_func
 from hcacdm.lib.convert_entity import fetch_entity_metadata_translation
+from hcacdm.lib.make_objects import json_to_objects
 from collections import defaultdict
 import re
 import json
-import urllib
-import sys
+import datetime
+NoneType = type(None)
 
 def get_dss_generator(hca_project_uuid):
     # files.project_json.provenance.document_id project uuid you want to retreive
@@ -226,18 +227,35 @@ def convert(hca_project_uuid, translation_config_file):
 
         # replace placeholders with links
         # NOTE nested entities are not checked
-        for entity_type, entities in translated_bundle_metadata.items():
+        for common_entity_type, entities in translated_bundle_metadata.items():
             for entity in entities:
                 for attribute_name, attribute_value in entity.items():
-                    if isinstance(attribute_value, str) and attribute_value.endswith('_PLACEHOLDER'):
+                    if (isinstance(attribute_value, str) and attribute_value.endswith('_PLACEHOLDER')) or (isinstance(attribute_value, list) and all(x.endswith('_PLACEHOLDER') for x in attribute_value)):
                         link_to_type = re.sub(r"refs?$", '', attribute_name)
-                        entity.update({attribute_name : assay_links.get(link_to_type)})
+                        links = assay_links.get(link_to_type)
+                        assert isinstance(links, (list, NoneType)), 'Links must return a list of links. Assumption made of config. Links returned {}'.format(links)
+                        cdm_required_type = translation_config.get(common_entity_type).get(attribute_name).get('type')
+                        if cdm_required_type == 'array':
+                            entity.update({attribute_name : links})
+                        elif cdm_required_type == 'string':
+                            assert len(links) == 1, 'Only one link should be retunred for field {}.{} but got {}'.format(common_entity_type, attribute_name, links)
+                            entity.update({attribute_name: links[0]})
+
 
         # add bundle metadata to project metadata
         for entity_type, entities in translated_bundle_metadata.items():
             project_translated_output[entity_type] += entities
 
-
     # temp writing out json for inspection
     with open('hcacdm/lib/log/' + hca_project_uuid + '.common_format.json', 'w+') as f:
         json.dump(project_translated_output, f)
+
+    # Convert JSON serialisable object (project_translated_output) -> CDM Python Objects
+
+    conversion_info = {
+        'conversion method': 'Automatic HCA converter',
+        'input hca project uuid': hca_project_uuid,
+        'conversion timestamp': datetime.datetime.now()
+    }
+    return json_to_objects(project_translated_output, translation_config, conversion_info).submission_object
+

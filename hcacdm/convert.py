@@ -17,8 +17,8 @@ translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression
 
 # HCA projects manually discovered September 2019
 
-# hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on this dataset
-hca_project_uuid = '008e40e8-66ae-43bb-951c-c073a2fa6774' # No error
+hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on this dataset
+# hca_project_uuid = '008e40e8-66ae-43bb-951c-c073a2fa6774' # No error
 # hca_project_uuid = 'abe1a013-af7a-45ed-8c26-f3793c24a1f4' # No error
 # hca_project_uuid = 'c4077b3c-5c98-4d26-a614-246d12c2e5d7' # No error
 # hca_project_uuid = '90bd6933-40c0-48d4-8d76-778c103bf545' # No error
@@ -42,8 +42,10 @@ hca_project_uuid = '008e40e8-66ae-43bb-951c-c073a2fa6774' # No error
 # hca_project_uuid = 'a29952d9-925e-40f4-8a1c-274f118f1f51' # hca.util.exceptions.SwaggerAPIException: None: None (HTTP 502). Details: {"message": "Internal server error"}
 # hca_project_uuid = 'f8aa201c-4ff1-45a4-890e-840d63459ca2' # AssertionError: This method expects 1 file per bundle. Detected mutiple singlecell_assay entities in bundle ff87cae7-75ec-403d-b505-ae6d816ba424
 
-convert(hca_project_uuid, translation_config_file)
+submission_object = convert(hca_project_uuid, translation_config_file)
 
 # property_migrations_file_url = 'https://raw.githubusercontent.com/HumanCellAtlas/metadata-schema/master/json_schema/property_migrations.json'
 # augment_config(hca_project_uuid, translation_config_file, property_migrations_file_url)
+
+print('Conversion of {} complete'.format(hca_project_uuid))
 

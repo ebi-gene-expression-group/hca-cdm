@@ -450,7 +450,7 @@
     },
     "protocol_type": {
       "description": "experiment type ontology term",
-      "type": "Attribute",
+      "type": "attribute",
       "import": {
         "ae": {
           "path": [
@@ -593,7 +593,7 @@
     },
     "taxonId": {
       "description": "NCBI taxonomy identifier for the species",
-      "type": "integer",
+      "type": "string",
       "import": {
         "ae": {
           "path": ["taxonId"],
@@ -618,7 +618,7 @@
             "attributes",
             "material_type"
           ],
-          "from_type": "Attribute",
+          "from_type": "attribute",
           "method": "get_string_from_attribute"
         },
         "hca": {

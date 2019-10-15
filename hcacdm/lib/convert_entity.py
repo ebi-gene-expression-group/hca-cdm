@@ -4,6 +4,7 @@ __date__ = "30/08/2019"
 
 from collections import OrderedDict
 import sys
+
 # todo maybe add one formatter func to remove [] and underscores?
 
 class fetch_entity_metadata_translation:
@@ -45,8 +46,9 @@ class fetch_entity_metadata_translation:
 
             if common_attribute == 'alias':
                 self.links[self.common_entity_type].append(attribute_value)
+        attribute_value_dict = {k: v for k, v in attribute_value_dict.items() if v != None}  # strip keys with None values
 
-        self.translated_entity_metadata = attribute_value_dict # alias is required
+        self.translated_entity_metadata = attribute_value_dict # return final entity metadata
 
     # main get method
     def get_attribute_value(self):
@@ -58,6 +60,7 @@ class fetch_entity_metadata_translation:
         # CONFIG REQUIRED hca listed path to attribute (need updating as schema evolves) HCA ENTITY name e.g. project_json is top of list
         self.import_path = self.t.get('import').get('hca').get('path')
         self.import_translation = self.t.get('import').get('hca').get('translation', None)
+
         if isinstance(self.import_translation, dict):
             self.import_translation.update({a: None for a, b in self.import_translation.items() if b == 'null'}) # JSON doesn't support None
         assert self.import_path or self.import_path == [], 'Missing import_path in config for attribute {}'.format(
@@ -71,7 +74,79 @@ class fetch_entity_metadata_translation:
 
         # get attribute value
         attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
-        return attribute_value
+
+        # ensure correct object type map attribute value type to requested type
+        return self.object_type_mapping(attribute_value)
+
+    def object_type_mapping(self, attribute_value):
+        # logic and rules for mapping cdm to HCA value types
+        # this only returns str, list or dict. Final export step converts to cdm python objects as dicated in config.
+
+        # pull type information from config
+        cdm_required_type = self.t.get('type')
+        allowed_cdm_required_types = ['string', 'array', 'attribute', 'integer','object']  # allowed values in config types
+        allowed_cdm_required_array_types = ['publication', 'contact', 'data_file','string']  # allowed values in config item
+
+        assert cdm_required_type in allowed_cdm_required_types, 'Unrecognised type "{}" in config. See entity {}.{}'.format(cdm_required_type, self.common_entity_type, self.common_attribute)  # assertions just warn about new types
+        if cdm_required_type == 'array':
+            assert self.t.get('items'), 'Config with array type requires "item" entry. See {}.{}'.format(
+                self.common_entity_type, self.common_attribute)
+            array_item_type = self.t.get('items')
+            assert array_item_type in allowed_cdm_required_array_types, 'Unrecognised item "{}" in config. See entity {}.{}'.format(
+                self.array_item_type, self.common_entity_type, self.common_attribute)  # assertions just warn about new type
+        else:
+            array_item_type = None
+
+        # mapping rules - NB more may be needed as config evolves
+
+        if cdm_required_type in ['string', 'integer']:
+            if attribute_value == None:
+                return None
+            if isinstance(attribute_value, (str, int)):
+                return str(attribute_value) # int not allowed, force str
+            if isinstance(attribute_value, dict) and all(y in attribute_value for y in ['ontology', 'ontology_label', 'text']): # single ontology dict
+                ontology = attribute_value.get('ontology')
+                ontology_label = attribute_value.get('ontology_label')
+                text = attribute_value.get('text')
+                if ontology_label: # label preferred
+                    return ontology_label
+                elif ontology:
+                    return ontology
+                elif text:
+                    return text
+                else:
+                    return None
+
+        elif cdm_required_type == 'array':
+            if array_item_type == 'string':
+                if isinstance(attribute_value, list) and all(isinstance(y, str) for y in attribute_value):
+                    return attribute_value
+                elif isinstance(attribute_value, str):
+                    return [attribute_value]
+            elif array_item_type in ['publication', 'contact', 'data_file']:
+                if isinstance(attribute_value, (dict)):
+                    return (attribute_value)
+
+
+        elif cdm_required_type in ['object', 'attribute']:
+            if isinstance(attribute_value, (dict)):
+                return (attribute_value)
+
+        # todo deal with lists of ontologies
+
+        else:
+            raise AttributeError('Missing logic for object typing. \n'
+                                '{}.{}\n'
+                                'Value: {}\n'
+                                'HCA metadata contains: {}\n'
+                                'Common data model requires type: {}\n'
+                                'Common data model array type requires: {}\n'
+                                ''.format(self.common_entity_type,
+                                self.common_attribute,
+                                attribute_value,
+                                type(attribute_value),
+                                cdm_required_type,
+                                array_item_type))
 
     # General Methods
 
@@ -91,11 +166,6 @@ class fetch_entity_metadata_translation:
                 value = value.get(level, None)
             else:
                 continue
-
-        # ontology_label is preferred but text field should be serched if value is not available
-        if self.import_path[-1] == 'ontology_label' and value == None:
-            self.import_path[-1] = 'text'
-            self.import_string()
 
         return value
 
@@ -205,8 +275,9 @@ class fetch_entity_metadata_translation:
         '''
         Extract extra attributes not captured by common data model schema.
         Look at biomaterials in order of sequence in the graph.
-        todo ignore fields that have already been added to the model for the last entity.
+        todo ignore fields that have already been added to the model for the last entity. Not just a blanket skip first entity!!
         todo this counter may need some refactoring when the design is complete. This is to protect against replacing keys of the same attribute in the column headers of the sdrf. This needs testing with real data.
+        todo make dict to suite Attribute class.
         '''
 
         def list_handler(in_list):
@@ -233,12 +304,13 @@ class fetch_entity_metadata_translation:
         entity_counter = {}
 
         for biomaterial_uuid in self.bundle_graph.ordered_biomaterials:
-            # # certain branches can be ignored when exploring the tree.
+            # certain branches can be ignored when exploring the tree.
+            ignore_top_level = ['schema_type', 'provenance', 'describedBy']
 
             biomaterial_metadata = self.metadata_files_by_uuid.get(biomaterial_uuid)
             material_type = biomaterial_metadata.get('describedBy').split('/')[-1]
 
-            # counter
+            # counter for multi entity chains e.g. cell sus -> cell sus
             if material_type in entity_counter:
                 entity_counter[material_type] += 1
             else:
@@ -246,7 +318,6 @@ class fetch_entity_metadata_translation:
             entity_type_count = material_type + '_' + str(entity_counter.get(material_type))
 
 
-            ignore_top_level = ['schema_type', 'provenance', 'describedBy']
             entity_extra_attributes = {}
 
             # Explicit metadata parser only supports expected levels of nesting and datatypes at those levels by design but it otherwise it not hard coded.
@@ -277,7 +348,80 @@ class fetch_entity_metadata_translation:
 
                 extra_attributes.update(entity_extra_attributes)
 
-        return extra_attributes
+        # condense ontologies and units
+
+        '''
+        This relies on the HCA style guide. Assumptions:
+        - ending ontology attributes with '.text', '.ontology' and '.ontology_label'
+        - ending unit with '_unit.text', '_unit.ontology' and '_unit.ontology_label'
+        '''
+
+        condensed_extra_attributes = OrderedDict()
+        unit_attributes = {}
+        ontology_attributes = {}
+        ontology_endings = {
+            '.ontology_label' : 'value',
+            '.ontology': 'term_accession'
+        }
+        unit_endings = {
+            '_unit.text': 'value',
+            '_unit.ontology_label': 'unit_type',
+            '_unit.ontology': 'term_accession',
+        }
+        # term_source should always be HCAO
+        # unit needs adding if any unit info is found
+
+
+        # look for nested entries and split
+        for sub_attribute_name, sub_attribute_value in extra_attributes.items():
+            # name_ending = sub_attribute_name.split('.')[-1]
+            if any(sub_attribute_name.endswith(y) for y in unit_endings):
+                unit_attributes[sub_attribute_name] = sub_attribute_value
+            elif any(sub_attribute_name.endswith(y) for y in ontology_endings):
+                ontology_attributes[sub_attribute_name] = sub_attribute_value
+            else:
+                condensed_extra_attributes[sub_attribute_name] = {'value' : sub_attribute_value}
+
+        def sub_attribute_lookup(subattribute_list, endings_dict, mode):
+            for sub_attribute_name, sub_attribute_value in subattribute_list.items():
+                ending = [k for k, v in endings_dict.items() if sub_attribute_name.endswith(k)][0]
+                info_key = endings_dict.get(ending)
+                stripped_name = sub_attribute_name.replace(ending, '')
+
+                if condensed_extra_attributes.get(stripped_name, None):
+                    condensed_attribute = stripped_name
+                elif condensed_extra_attributes.get(stripped_name + '.text', None):
+                    condensed_attribute = stripped_name + '.text'
+                else:
+                    raise ValueError('Cannot find attribute called {} to add {} to.'.format(stripped_name, sub_attribute_name))
+
+                if info_key == 'term_accession' and mode == 'ontology':
+                    condensed_extra_attributes[condensed_attribute]['term_source'] = 'http://ontology.staging.data.humancellatlas.org/index'
+                    condensed_extra_attributes[condensed_attribute][info_key] = sub_attribute_value
+                elif info_key == 'value' and mode == 'ontology':
+                    continue # this information is lost but can be regained using the curie
+                elif info_key == 'term_accession' and mode == 'unit':
+                    if condensed_extra_attributes[condensed_attribute].get('unit'):
+                        condensed_extra_attributes[condensed_attribute]['unit']['term_accession'] = sub_attribute_value
+                    else:
+                        condensed_extra_attributes[condensed_attribute]['unit'] = {'term_accession':sub_attribute_value}
+                elif info_key == 'value' and mode == 'unit':
+                    if condensed_extra_attributes[condensed_attribute].get('unit'):
+                        condensed_extra_attributes[condensed_attribute]['unit']['value'] = sub_attribute_value
+                    else:
+                        condensed_extra_attributes[condensed_attribute]['unit'] = {'value':sub_attribute_value}
+                elif info_key == 'unit_type' and mode == 'unit':
+                    if condensed_extra_attributes[condensed_attribute].get('unit'):
+                        condensed_extra_attributes[condensed_attribute]['unit']['unit_type'] = sub_attribute_value
+                    else:
+                        condensed_extra_attributes[condensed_attribute]['unit'] = {'unit_type':sub_attribute_value}
+                else:
+                    raise ValueError('Cannot place value {} because {} is not defined in code.'.format(sub_attribute_value, info_key))
+
+        sub_attribute_lookup(ontology_attributes, ontology_endings, 'ontology')
+        sub_attribute_lookup(unit_attributes, unit_endings, 'unit')
+
+        return condensed_extra_attributes
 
     # Assay Data Methods
 
