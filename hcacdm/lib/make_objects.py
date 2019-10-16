@@ -2,7 +2,7 @@ __author__ = "hewgreen"
 __license__ = "Apache 2.0"
 __date__ = "08/10/2019"
 
-from hcacdm import hca_project_importer
+from hcacdm import ProjectImporter
 from datamodel.submission import Submission
 from datamodel.sample import Sample
 from datamodel.protocol import Protocol
@@ -107,7 +107,7 @@ class json_to_objects:
         # make the submission object
 
         for common_entity_type, entities in submission.items(): # specify non list for one_entity_per_project
-            if hca_project_importer.get_entity_granularity(common_entity_type) == 'one_entity_per_project':
+            if ProjectImporter.get_entity_granularity(common_entity_type) == 'one_entity_per_project':
                 assert len(entities) == 1, 'Submission can only contain 1 {}'.format(common_entity_type)
                 submission[common_entity_type] = entities[0]
         submission['assay'] = submission.pop('singlecell_assay')  # hca project only use this assay type.

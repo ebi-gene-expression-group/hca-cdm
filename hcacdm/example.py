@@ -9,7 +9,7 @@ __author__ = "hewgreen"
 __license__ = "Apache 2.0"
 __date__ = "20/09/2019"
 
-from hcacdm.hca_project_importer import convert
+from hcacdm.ProjectImporter import convert
 
 translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
 
