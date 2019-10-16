@@ -1,9 +1,0 @@
-.gitignore
-README.md
-setup.py
-hcacdm/__init__.py
-hcacdm/convert.py
-hcacdm.egg-info/PKG-INFO
-hcacdm.egg-info/SOURCES.txt
-hcacdm.egg-info/dependency_links.txt
-hcacdm.egg-info/top_level.txt

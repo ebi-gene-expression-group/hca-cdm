@@ -2,7 +2,7 @@ __author__ = "hewgreen"
 __license__ = "Apache 2.0"
 __date__ = "08/10/2019"
 
-from hcacdm.lib import hca_project_importer
+from hcacdm import hca_project_importer
 from datamodel.submission import Submission
 from datamodel.sample import Sample
 from datamodel.protocol import Protocol
@@ -13,7 +13,7 @@ from datamodel.components import Attribute, Unit
 from datamodel.data import AssayData
 import re
 from collections import defaultdict
-import sys
+
 
 class json_to_objects:
 
