@@ -21,8 +21,7 @@ setuptools.setup(
                 'urllib3'
           ],
     dependency_links=[
-        'https://github.com/ebi-gene-expression-group/common-datamodel',
-        'https://github.com/ebi-gene-expression-group/hca-cdm'
+        'https://github.com/ebi-gene-expression-group/common-datamodel'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -1,10 +1,30 @@
 # HCA to Atlas Metadata Converter
 
-## Install
+HCA metadata into Atlas Common Model python objects. Used by https://github.com/ebi-gene-expression-group/common-datamodel to write and validate MAGE-TAB.
+
+## Quick start
 
 `pip3 install git+https://github.com/ebi-gene-expression-group/hca-cdm`
 
+Dependancies will also be installed.
 
+From example.py:
+```
+from hcacdm.ProjectImporter import convert
+
+translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
+hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79'
+submission_object = convert(hca_project_uuid, translation_config_file)
+```
+
+#### Work in progress
+- automatically update the config based on metadata versions attached to data in DSS
+- automatic data discovery with ability to configure exclusions based on Atlas's dataset requirements e.g. no imaging, drop seq etc. inc assert experiment type aka 'RNA-seq of coding RNA from single cells' assumption.
+
+## Editing the config
+
+
+The config is part of the common data model repo found here 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
 
 Config allows:
 - mapping attributes
@@ -12,15 +32,6 @@ Config allows:
 - succinct special handling functions
 - handling nested entities
 - adding links via entity alias
-
-
-#### New side modules
-- automatically update the config based on metadata versions attached to data in DSS
-- automatic data discovery with ability to configure exclusions based on Atlas's dataset requirements e.g. no imaging, drop seq etc. inc assert experiment type aka 'RNA-seq of coding RNA from single cells' assumption.
-
-## Editing the config
-
-The config is part of the common data model repo found here 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
 
 Each Atlas attribute is nested under it's respective entity type. Each attribute has entiries for their respective mapping source. Currently ae (aka Array Express) and hca (aka Human Cell Atlas DCP) are currently supported. Under the 'hca' label each attribute has several elements described below.
 
