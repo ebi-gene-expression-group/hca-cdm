@@ -16,6 +16,7 @@ from collections import defaultdict
 import re
 import json
 import datetime
+import urllib
 NoneType = type(None)
 
 def get_dss_generator(hca_project_uuid):
@@ -130,8 +131,8 @@ def get_entity_granularity(common_entity_type):
 def convert(hca_project_uuid, translation_config_file):
 
     # initialise
-    # filename, headers = urllib.request.urlretrieve(translation_config_file, filename='hcacdm/etc/translation_config.json')
-    filename = 'hcacdm/etc/translation_config.json' # temp for local testing
+    filename, headers = urllib.request.urlretrieve(translation_config_file, filename='hcacdm/etc/translation_config.json')
+    # filename = 'hcacdm/etc/translation_config.json' # temp for local testing
 
     with open(filename) as f:
         translation_config = json.load(f)
