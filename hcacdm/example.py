@@ -1,8 +1,6 @@
 '''
 temp script demonstrating use of functions in lib
-runs converter on various hca projects
-
-todo When testing is done on all the datasets and the software is stable this should be replaced by a script that can take arguments via argparse.
+runs converter on various hca projects (project uuids as of 09/2019)
 '''
 
 __author__ = "hewgreen"
@@ -35,16 +33,22 @@ hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on
 # hca_project_uuid = 'a9c022b4-c771-4468-b769-cabcf9738de3' # No error
 # hca_project_uuid = 'f86f1ab4-1fbb-4510-ae35-3ffd752d4dfc' # No error
 # hca_project_uuid = '8c3c290d-dfff-4553-8868-54ce45f4ba7f' # Taking ages
-# hca_project_uuid = 'f83165c5-e2ea-4d15-a5cf-33f3550bffde'  # No error
-
-
+# hca_project_uuid = 'f83165c5-e2ea-4d15-a5cf-33f3550bffde' # No error
 # hca_project_uuid = 'a29952d9-925e-40f4-8a1c-274f118f1f51' # hca.util.exceptions.SwaggerAPIException: None: None (HTTP 502). Details: {"message": "Internal server error"}
 # hca_project_uuid = 'f8aa201c-4ff1-45a4-890e-840d63459ca2' # AssertionError: This method expects 1 file per bundle. Detected mutiple singlecell_assay entities in bundle ff87cae7-75ec-403d-b505-ae6d816ba424
-submission_object = convert(hca_project_uuid, translation_config_file)
 
+
+# How to run the convert function
+
+
+submission_object = convert(hca_project_uuid, translation_config_file)
+print('Conversion of {} complete'.format(hca_project_uuid))
+
+
+# DEV automatic migration of config file as HCA schema shift
 
 # property_migrations_file_url = 'https://raw.githubusercontent.com/HumanCellAtlas/metadata-schema/master/json_schema/property_migrations.json'
 # augment_config(hca_project_uuid, translation_config_file, property_migrations_file_url)
 
-print('Conversion of {} complete'.format(hca_project_uuid))
+
 
