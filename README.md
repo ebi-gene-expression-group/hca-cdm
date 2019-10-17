@@ -4,9 +4,11 @@ HCA metadata into Atlas Common Model python objects. Used by https://github.com/
 
 ## Quick start
 
-`pip3 install git+https://github.com/ebi-gene-expression-group/hca-cdm --process-dependency-links --allow-all-external`
+```
+pip3 install git+https://github.com/ebi-gene-expression-group/common-datamodel
+pip3 install git+https://github.com/ebi-gene-expression-group/hca-cdm
+```
 
-Non PyPi dependancy will also be installed.
 
 From example.py:
 ```
