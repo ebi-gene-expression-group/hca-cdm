@@ -19,11 +19,9 @@ setuptools.setup(
                 'networkx',
                 'requests',
                 'urllib3',
-                'datamodel==1.0.0'
+                'datamodel==1.0.0',
+                'datamodel==1.0.0 @ https://github.com/ebi-gene-expression-group/common-datamodel#egg=datamodel-1.0.0',
           ],
-    dependency_links=[
-        'https://github.com/ebi-gene-expression-group/common-datamodel#egg=datamodel-1.0.0'
-    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
