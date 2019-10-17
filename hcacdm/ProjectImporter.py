@@ -131,11 +131,9 @@ def get_entity_granularity(common_entity_type):
 def convert(hca_project_uuid, translation_config_file):
 
     # initialise
-    filename, headers = urllib.request.urlretrieve(translation_config_file, filename='hcacdm/etc/translation_config.json')
+    json_config = urllib.request.urlopen(translation_config_file)
+    translation_config = json.load(json_config)
     # filename = 'hcacdm/etc/translation_config.json' # temp for local testing
-
-    with open(filename) as f:
-        translation_config = json.load(f)
 
     # print('Types defined in the config: {}'.format(config_entity_types(translation_config)))
 

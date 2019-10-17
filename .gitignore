@@ -3,3 +3,4 @@ hcacdm/log/
 .idea/
 __pycache__/
 hcacdm/etc/
+hcacdm/etc/translation_config.json
