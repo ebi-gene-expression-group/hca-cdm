@@ -1,14 +1,10 @@
 # HCA to Atlas Metadata Converter
 
-This project is in active development so this file is mainly a todo list for future versions.
+## Install
 
-### Features
+`pip3 install git+https://github.com/ebi-gene-expression-group/hca-cdm`
 
-Given a HCA project uuid and a configuation file:
-- query the HCA DCP DSS and retreive metadata for the project
-- Iterate through the attribute in the config and pull in values from the HCA metadata
-- Constructs HCA metadata bundle graphs allowing complex graph queries via networkx
-- Flexible sample handling ordering extra sample attributes for sdrf writing
+
 
 Config allows:
 - mapping attributes
@@ -18,21 +14,13 @@ Config allows:
 - adding links via entity alias
 
 
-### Things to do pre v1
-
-- implement logging and warnings to check conversion quality
-- Common data model also has an attribute/ontology object type and a unit object type that should be used when appropriate.
-- Review fields left over (not on sample extra entities) and produce a list for curators to review to see if we need to bolster the Atlas schema.
-- Double check the config that all have path and import method. The type may or may not be needed but should be all in or out at the end.
-- add argparse arguments to importer.py
-
-
-
 #### New side modules
 - automatically update the config based on metadata versions attached to data in DSS
 - automatic data discovery with ability to configure exclusions based on Atlas's dataset requirements e.g. no imaging, drop seq etc. inc assert experiment type aka 'RNA-seq of coding RNA from single cells' assumption.
 
 ## Editing the config
+
+The config is part of the common data model repo found here 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
 
 Each Atlas attribute is nested under it's respective entity type. Each attribute has entiries for their respective mapping source. Currently ae (aka Array Express) and hca (aka Human Cell Atlas DCP) are currently supported. Under the 'hca' label each attribute has several elements described below.
 

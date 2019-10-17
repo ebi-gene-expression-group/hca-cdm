@@ -13,10 +13,21 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/ebi-gene-expression-group/hca-cdm",
     packages=setuptools.find_packages(),
+    install_requires=[
+                'hca',
+                'hca-ingest',
+                'networkx',
+                'requests',
+                'urllib3'
+          ],
+    dependency_links=[
+        'https://github.com/ebi-gene-expression-group/common-datamodel',
+        'https://github.com/ebi-gene-expression-group/hca-cdm'
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.6'
 )

@@ -52,4 +52,4 @@ tweak==1.0.3
 urllib3==1.25.6
 XlsxWriter==1.2.1
 git+https://github.com/ebi-gene-expression-group/common-datamodel
-git+https://github.com/ebi-gene-expression-group/hca-cdm.git
+git+https://github.com/ebi-gene-expression-group/hca-cdm
