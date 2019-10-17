@@ -18,8 +18,7 @@ setuptools.setup(
                 'hca-ingest',
                 'networkx',
                 'requests',
-                'urllib3',
-                'datamodel @ https://github.com/ebi-gene-expression-group/common-datamodel#egg=datamodel-1.0.0',
+                'urllib3'
           ],
     classifiers=[
         "Programming Language :: Python :: 3",
