@@ -21,7 +21,7 @@ setuptools.setup(
                 'urllib3'
           ],
     dependency_links=[
-        'https://github.com/ebi-gene-expression-group/common-datamodel'
+        'https://github.com/ebi-gene-expression-group/common-datamodel#egg=datamodel-1.0.0'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
