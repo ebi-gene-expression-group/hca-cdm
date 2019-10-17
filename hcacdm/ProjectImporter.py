@@ -9,9 +9,9 @@ __date__ = "30/08/2019"
 
 from hca.dss import DSSClient
 from ingest.api.ingestapi import IngestApi
-import hcacdm.lib.aux_func as aux_func
-from hcacdm.lib.convert_entity import fetch_entity_metadata_translation
-from hcacdm.lib.make_objects import json_to_objects
+from .lib import aux_func as aux_func
+from .lib.convert_entity import fetch_entity_metadata_translation
+from .lib.make_objects import json_to_objects
 from collections import defaultdict
 import re
 import json
