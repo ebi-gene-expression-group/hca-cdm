@@ -17,6 +17,7 @@ import re
 import json
 import datetime
 import urllib
+import os
 NoneType = type(None)
 
 def get_dss_generator(hca_project_uuid):
@@ -245,8 +246,14 @@ def convert(hca_project_uuid, translation_config_file):
         for entity_type, entities in translated_bundle_metadata.items():
             project_translated_output[entity_type] += entities
 
-    # temp writing out json for inspection
-    with open('hcacdm/log/' + hca_project_uuid + '.common_format.json', 'w+') as f:
+
+    # saving log
+
+    log_dir = 'hcacdm/log/'
+    log_filename = log_dir + hca_project_uuid + '.common_format.json'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    with open(log_filename, 'w+') as f:
         json.dump(project_translated_output, f)
 
     # Convert JSON serialisable object (project_translated_output) -> CDM Python Objects
