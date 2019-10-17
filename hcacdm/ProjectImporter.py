@@ -9,9 +9,9 @@ __date__ = "30/08/2019"
 
 from hca.dss import DSSClient
 from ingest.api.ingestapi import IngestApi
-from .lib import aux_func as aux_func
-from .lib.convert_entity import fetch_entity_metadata_translation
-from .lib.make_objects import json_to_objects
+from hcacdm import aux_func as aux_func
+from hcacdm.convert_entity import fetch_entity_metadata_translation
+from hcacdm.make_objects import json_to_objects
 from collections import defaultdict
 import re
 import json
@@ -247,7 +247,7 @@ def convert(hca_project_uuid, translation_config_file):
             project_translated_output[entity_type] += entities
 
     # temp writing out json for inspection
-    with open('hcacdm/lib/log/' + hca_project_uuid + '.common_format.json', 'w+') as f:
+    with open('hcacdm/log/' + hca_project_uuid + '.common_format.json', 'w+') as f:
         json.dump(project_translated_output, f)
 
     # Convert JSON serialisable object (project_translated_output) -> CDM Python Objects
