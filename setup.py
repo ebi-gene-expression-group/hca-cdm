@@ -16,7 +16,7 @@ setuptools.setup(
     install_requires=[
                 'hca',
                 'hca-ingest',
-                'networkx',
+                'networkx==2.3',
                 'requests',
                 'urllib3'
           ],
