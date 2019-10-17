@@ -18,7 +18,8 @@ setuptools.setup(
                 'hca-ingest',
                 'networkx',
                 'requests',
-                'urllib3'
+                'urllib3',
+                'datamodel==1.0.0'
           ],
     dependency_links=[
         'https://github.com/ebi-gene-expression-group/common-datamodel#egg=datamodel-1.0.0'
