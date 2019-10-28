@@ -230,16 +230,16 @@ def convert(hca_project_uuid, translation_config_file):
         for common_entity_type, entities in translated_bundle_metadata.items():
             for entity in entities:
                 for attribute_name, attribute_value in entity.items():
-                    if (isinstance(attribute_value, str) and attribute_value.endswith('_PLACEHOLDER')) or (isinstance(attribute_value, list) and all(x.endswith('_PLACEHOLDER') for x in attribute_value)):
-                        link_to_type = re.sub(r"refs?$", '', attribute_name)
-                        links = assay_links.get(link_to_type)
-                        assert isinstance(links, (list, NoneType)), 'Links must return a list of links. Assumption made of config. Links returned {}'.format(links)
-                        cdm_required_type = translation_config.get(common_entity_type).get(attribute_name).get('type')
-                        if cdm_required_type == 'array':
-                            entity.update({attribute_name : links})
-                        elif cdm_required_type == 'string':
-                            assert len(links) == 1, 'Only one link should be retunred for field {}.{} but got {}'.format(common_entity_type, attribute_name, links)
-                            entity.update({attribute_name: links[0]})
+                        if (isinstance(attribute_value, str) and attribute_value.endswith('_PLACEHOLDER')) or (isinstance(attribute_value, list) and all(isinstance(x, str) for x in attribute_value) and all(x.endswith('_PLACEHOLDER') for x in attribute_value)):
+                            link_to_type = re.sub(r"refs?$", '', attribute_name)
+                            links = assay_links.get(link_to_type)
+                            assert isinstance(links, (list, NoneType)), 'Links must return a list of links. Assumption made of config. Links returned {}'.format(links)
+                            cdm_required_type = translation_config.get(common_entity_type).get(attribute_name).get('type')
+                            if cdm_required_type == 'array':
+                                entity.update({attribute_name : links})
+                            elif cdm_required_type == 'string':
+                                assert len(links) == 1, 'Only one link should be retunred for field {}.{} but got {}'.format(common_entity_type, attribute_name, links)
+                                entity.update({attribute_name: links[0]})
 
 
         # add bundle metadata to project metadata

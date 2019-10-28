@@ -42,16 +42,19 @@ class fetch_entity_metadata_translation:
 
             attribute_value = self.get_attribute_value()
             attribute_value_dict[self.common_attribute] = attribute_value
-            # print('{} : {}'.format(self.common_attribute, attribute_value))
+            # print('{} : {}'.format(self.self.common_attribute, attribute_value))
 
-            if common_attribute == 'alias':
+            if self.common_attribute == 'alias':
                 self.links[self.common_entity_type].append(attribute_value)
+
         attribute_value_dict = {k: v for k, v in attribute_value_dict.items() if v != None}  # strip keys with None values
 
         self.translated_entity_metadata = attribute_value_dict # return final entity metadata
 
     # main get method
     def get_attribute_value(self):
+
+
         if self.t.get('import', None) == None:
             return
         elif self.t.get('import', None).get('hca', None) == None: # if 'hca' is missing in config, return None (e.g. hca doesn't have fax attribute)
@@ -83,6 +86,7 @@ class fetch_entity_metadata_translation:
         # this only returns str, list or dict. Final export step converts to cdm python objects as dicated in config.
 
         # pull type information from config
+        error_raise = False
         cdm_required_type = self.t.get('type')
         allowed_cdm_required_types = ['string', 'array', 'attribute', 'integer','object']  # allowed values in config types
         allowed_cdm_required_array_types = ['publication', 'contact', 'data_file','string']  # allowed values in config item
@@ -118,23 +122,41 @@ class fetch_entity_metadata_translation:
                     return None
 
         elif cdm_required_type == 'array':
-            if array_item_type == 'string':
+            if attribute_value == None:
+                return None
+            elif array_item_type == 'string':
                 if isinstance(attribute_value, list) and all(isinstance(y, str) for y in attribute_value):
                     return attribute_value
                 elif isinstance(attribute_value, str):
                     return [attribute_value]
             elif array_item_type in ['publication', 'contact', 'data_file']:
-                if isinstance(attribute_value, (dict)):
+                if isinstance(attribute_value, (list)):
                     return (attribute_value)
+                else:
+                    error_raise = True
+            else:
+                error_raise = True
 
 
         elif cdm_required_type in ['object', 'attribute']:
-            if isinstance(attribute_value, (dict)):
+            if attribute_value == None:
+                return None
+            elif isinstance(attribute_value, (str)):
+                if attribute_value.endswith('_PLACEHOLDER'):
+                    return attribute_value
+                else:
+                    return {'value': attribute_value}
+            elif isinstance(attribute_value, (dict)):
                 return (attribute_value)
+            else:
+                error_raise = True
+
+        else:
+            error_raise = True
 
         # todo deal with lists of ontologies
 
-        else:
+        if error_raise:
             raise AttributeError('Missing logic for object typing. \n'
                                 '{}.{}\n'
                                 'Value: {}\n'
@@ -142,11 +164,12 @@ class fetch_entity_metadata_translation:
                                 'Common data model requires type: {}\n'
                                 'Common data model array type requires: {}\n'
                                 ''.format(self.common_entity_type,
-                                self.common_attribute,
+                                          self.common_attribute,
                                 attribute_value,
                                 type(attribute_value),
                                 cdm_required_type,
                                 array_item_type))
+
 
     # General Methods
 
@@ -177,7 +200,7 @@ class fetch_entity_metadata_translation:
                 return None
         return value
 
-    def import_nested(self, entities):
+    def import_nested(self, entities, nested_entity_type, top_level_common_attribute):
         # imports nested entities (contacts, publications etc)
         if entities == None:
             return None
@@ -185,7 +208,7 @@ class fetch_entity_metadata_translation:
         for selected_entity in entities:
             self.selected_entity = selected_entity
             entity_metadata = {}
-            nested_entity_translator_config = self.translation_config.get(self.nested_entity_type)
+            nested_entity_translator_config = self.translation_config.get(nested_entity_type)
             assert nested_entity_translator_config, 'Config missing nested entity describing {}'.format(self.nested_entity_type)
             for common_attribute, t in nested_entity_translator_config.items():
                 if not t.get('import').get('hca', False): # skip fields without a hca entry
@@ -193,16 +216,17 @@ class fetch_entity_metadata_translation:
                 self.common_attribute = common_attribute
                 self.t = t
 
-                # print('WORKING ON NESTED {}'.format(common_attribute))
+                # print('WORKING ON NESTED {}'.format(self.common_attribute))
                 attribute_value = self.get_attribute_value()
-                entity_metadata[common_attribute] = attribute_value
+                entity_metadata[self.common_attribute] = attribute_value
+                self.common_attribute = str(top_level_common_attribute) # reset
+                self.t = self.attribute_translation.get(top_level_common_attribute)  # reset
                 # print('NESTED {} : {}'.format(common_attribute, attribute_value))
             nested_attributes_as_list.append(entity_metadata)
-        self.common_attribute = self.nested_entity_type
         return nested_attributes_as_list
 
     def use_translation(self):
-        # this method relies ont he translation field in the config to perform value manipulation.
+        # this method relies on the translation field in the config to perform value manipulation.
         assert self.import_translation != None, 'This method requires a translation string or dict in the config file.'
         assert isinstance(self.import_translation, (str, dict)), 'Translation in config should be of type str or dict'
         if type(self.import_translation) == str:
@@ -217,14 +241,16 @@ class fetch_entity_metadata_translation:
 
     # Project Methods
     def import_nested_publications(self):
-        self.nested_entity_type = 'publication'
+        top_level_common_attribute = str(self.common_attribute)
+        nested_entity_type = 'publication'
         entities = self.import_string()
-        return self.import_nested(entities)
+        return self.import_nested(entities, nested_entity_type, top_level_common_attribute)
 
     def import_nested_contacts(self):
-        self.nested_entity_type = 'contact'
+        top_level_common_attribute = str(self.common_attribute)
+        nested_entity_type = 'contact'
         entities = self.import_string()
-        return self.import_nested(entities)
+        return self.import_nested(entities, nested_entity_type, top_level_common_attribute)
 
     # Contacts Methods
 
@@ -427,14 +453,15 @@ class fetch_entity_metadata_translation:
 
     def import_nested_data_files(self):
         # data files are 'nested' in the common model but not in the HCA model so entities are derived differently
-        self.nested_entity_type = 'data_file'
+        top_level_common_attribute = str(self.common_attribute)
+        nested_entity_type = 'data_file'
         entities = self.metadata_files
         for level in self.import_path:
             if entities:
                 entities = entities.get(level, None)
             else:
                 continue
-        return self.import_nested(entities)
+        return self.import_nested(entities, nested_entity_type, top_level_common_attribute)
 
     # Data file method
 

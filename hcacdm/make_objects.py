@@ -1,3 +1,8 @@
+'''
+Pass objects as dict. Keys should correspond to those described in 'datamodel'
+No objects should be created before this step for clarity.
+'''
+
 __author__ = "hewgreen"
 __license__ = "Apache 2.0"
 __date__ = "08/10/2019"
@@ -32,7 +37,11 @@ class json_to_objects:
             'array': ['list', 'NoneType'],
             'string': ['str', 'NoneType'],
             'object':['dict', 'collections.OrderedDict', 'NoneType'],
-            'None': ['NoneType']
+            'None': ['NoneType'],
+            'contact': ['dict'],
+            'publication': ['dict'],
+            'attribute': ['dict'],
+            'data_file': ['dict']
         }
 
         self.main()
