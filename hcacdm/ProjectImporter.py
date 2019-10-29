@@ -232,8 +232,10 @@ def convert(hca_project_uuid, translation_config_file):
                 for attribute_name, attribute_value in entity.items():
                         if (isinstance(attribute_value, str) and attribute_value.endswith('_PLACEHOLDER')) or (isinstance(attribute_value, list) and all(isinstance(x, str) for x in attribute_value) and all(x.endswith('_PLACEHOLDER') for x in attribute_value)):
                             link_to_type = re.sub(r"refs?$", '', attribute_name)
+                            if link_to_type == 'assay':
+                                link_to_type = 'singlecell_assay' # assumption made that in the HCA context this is always the assay type.
                             links = assay_links.get(link_to_type)
-                            assert isinstance(links, (list, NoneType)), 'Links must return a list of links. Assumption made of config. Links returned {}'.format(links)
+                            assert isinstance(links, (list)), 'Links must return a list of links. Assumption made of config. Links returned {}'.format(links)
                             cdm_required_type = translation_config.get(common_entity_type).get(attribute_name).get('type')
                             if cdm_required_type == 'array':
                                 entity.update({attribute_name : links})
