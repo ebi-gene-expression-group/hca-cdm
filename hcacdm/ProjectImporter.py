@@ -134,9 +134,6 @@ def convert(hca_project_uuid, translation_config_file):
     # initialise
     json_config = urllib.request.urlopen(translation_config_file)
     translation_config = json.load(json_config)
-    # filename = 'hcacdm/etc/translation_config.json' # temp for local testing
-
-    # print('Types defined in the config: {}'.format(config_entity_types(translation_config)))
 
     res, total_hits = get_dss_generator(hca_project_uuid)
     hca_entities = get_hca_entity_types()
