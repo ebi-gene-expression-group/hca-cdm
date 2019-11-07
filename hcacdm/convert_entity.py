@@ -47,6 +47,8 @@ class fetch_entity_metadata_translation:
             if self.common_attribute == 'alias':
                 self.links[self.common_entity_type].append(attribute_value)
 
+
+
         # stripped_attribute_value_dict = {k: v for k, v in attribute_value_dict.items() if v != None}  # strip keys with None values
 
         # strip keys with None values, added back when obj are created
@@ -62,6 +64,8 @@ class fetch_entity_metadata_translation:
                     for obj in value:
                         new_value.append({k: v for k, v in obj.items() if v != None}) # nested None strip
                     stripped_attribute_value_dict[key] = new_value
+                else:
+                    stripped_attribute_value_dict[key] = value
             else:
                 stripped_attribute_value_dict[key] = value
 
