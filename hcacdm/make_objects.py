@@ -97,6 +97,8 @@ class json_to_objects:
                     entity[attribute_name] = attribute_obj_dict
                 else:
                     entity[attribute_name] = Attribute(**attribute_value)
+            elif cdm_required_type =='attribute':
+                entity[attribute_name] = Attribute(**attribute_value)
         return entity
 
 

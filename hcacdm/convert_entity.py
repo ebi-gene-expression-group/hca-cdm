@@ -506,7 +506,12 @@ class fetch_entity_metadata_translation:
         return self.import_string_from_selected_entity()
 
     def get_protocol_type(self):
-        return self.import_string_from_protocol().split('/')[-1]
+        hca_protocol_type = self.import_string_from_protocol().split('/')[-1]
+        value_translation = self.import_translation.get(hca_protocol_type, 'NOT FOUND')
+        # Stop if mapping not found. Expects all values be in translation dict even if unchanged. The behaivor may need to change in the future.
+        assert value_translation != 'NOT FOUND', 'Value "{}" is not in the config dict and cannot be converted. See {}'.format(
+            hca_protocol_type, str(self.common_entity_type + '.' + self.common_attribute))
+        return value_translation
 
     def get_protocol_operator(self):
         # traverse graph from protocol to find metadata on process nodes
