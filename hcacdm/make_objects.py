@@ -1,6 +1,7 @@
 '''
+Turns converted JSON into a python object for consumption by other datamodel code.
 Pass objects as dict. Keys should correspond to those described in 'datamodel'
-No objects should be created before this step for clarity.
+No python objects should be created before this step for clarity.
 '''
 
 __author__ = "hewgreen"

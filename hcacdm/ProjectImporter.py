@@ -1,5 +1,9 @@
 '''
-gets metadata for a hca project uuid
+
+func 'convert' is the main function.
+It gets metadata for a hca project uuid from the datastore bundles API.
+This API only returns bundes so the code iterates over bundles to build all the metadata for a DCP project.
+In the future there may be better endpoints for getting metadata.
 '''
 # todo automatically update config with new paths to attributes as HCA schema evolves
 

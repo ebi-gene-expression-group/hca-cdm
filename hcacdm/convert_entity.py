@@ -1,3 +1,9 @@
+'''
+This scrip converts HCA json entities into cdm mapped json entities.
+It works on one entity at a time.
+Conversion methods described in the converter config file should live in this script.
+'''
+
 __author__ = "hewgreen"
 __license__ = "Apache 2.0"
 __date__ = "30/08/2019"
@@ -28,6 +34,7 @@ class fetch_entity_metadata_translation:
         self.metadata_files_by_uuid = translation_params.get('metadata_files_by_uuid')
         self.translation_config = translation_params.get('translation_config')
         self.bundle_uuid = self.bundle.get('metadata').get('uuid')
+        self.bundle_fqid = self.bundle.get('bundle_fqid')
         self.protocol_uuid = protocol_uuid
         # print('WORKING ON ENITY TYPE: {}'.format(self.common_entity_type))
 
@@ -46,10 +53,6 @@ class fetch_entity_metadata_translation:
 
             if self.common_attribute == 'alias':
                 self.links[self.common_entity_type].append(attribute_value)
-
-
-
-        # stripped_attribute_value_dict = {k: v for k, v in attribute_value_dict.items() if v != None}  # strip keys with None values
 
         # strip keys with None values, added back when obj are created
         stripped_attribute_value_dict = {}
@@ -298,6 +301,9 @@ class fetch_entity_metadata_translation:
     # Assay Methods
     def get_hca_bundle_uuid(self):
         return self.bundle_uuid
+
+    def get_hca_bundle_version(self):
+        return self.bundle_fqid.replace(self.bundle_uuid + '.', '')
 
     # Sample Methods
 
