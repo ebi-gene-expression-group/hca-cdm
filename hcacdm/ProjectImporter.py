@@ -22,6 +22,8 @@ import json
 import datetime
 import urllib
 import os
+
+
 NoneType = type(None)
 
 def get_dss_generator(hca_project_uuid):
@@ -136,6 +138,10 @@ def get_entity_granularity(common_entity_type):
 def convert(hca_project_uuid, translation_config_file):
 
     # initialise
+    logger = aux_func.get_logger(__name__)
+    logger.info('Converting HCA uuid {}'.format(hca_project_uuid))
+    logger.info('Using config file {}'.format(translation_config_file))
+
     json_config = urllib.request.urlopen(translation_config_file)
     translation_config = json.load(json_config)
 
@@ -253,11 +259,12 @@ def convert(hca_project_uuid, translation_config_file):
     # saving log
 
     log_dir = 'hcacdm/log/'
-    log_filename = log_dir + hca_project_uuid + '.common_format.json'
+    json_out_filename = log_dir + hca_project_uuid + '.common_format.json'
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    with open(log_filename, 'w+') as f:
+    with open(json_out_filename, 'w+') as f:
         json.dump(project_translated_output, f)
+    logger.info('JSON saved to {}'.format(json_out_filename))
 
     # Convert JSON serialisable object (project_translated_output) -> CDM Python Objects
 

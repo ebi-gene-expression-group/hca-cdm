@@ -4,6 +4,9 @@ __date__ = "30/08/2019"
 
 import networkx as nx
 import json
+import logging
+import os
+from datetime import datetime
 
 class bundle_info:
     '''
@@ -78,3 +81,24 @@ def conf_coverage(translation_config_file):
             config_summary[attribute_name] = hca_mapped
     # print('{} attributes in config'.format(len(config_summary)))
     print('{}/{} attributes have hca mapping'.format(hca_mapped_counter, len(config_summary)))
+
+
+def get_logger(name):
+    log_format = '%(asctime)s  %(name)8s  %(levelname)5s  %(message)s'
+
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M')
+
+    log_dir = 'hcacdm/log/'
+    log_filename = log_dir + 'hcacdmConverter_' + timestamp + '.log'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format=log_format,
+                        filename=log_filename,
+                        filemode='w')
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    console.setFormatter(logging.Formatter(log_format))
+    logging.getLogger(name).addHandler(console)
+    return logging.getLogger(name)
