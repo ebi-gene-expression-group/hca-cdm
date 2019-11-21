@@ -20,7 +20,6 @@ from datamodel.data import AssayData
 import re
 from collections import defaultdict
 
-
 class json_to_objects:
 
     def __init__(self, project_translated_output, translation_config, conversion_info):
