@@ -42,6 +42,3 @@ hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on
 
 submission_object = convert(hca_project_uuid, translation_config_file)
 print('Conversion of {} complete'.format(hca_project_uuid))
-
-
-

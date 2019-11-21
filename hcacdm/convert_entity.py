@@ -102,6 +102,9 @@ class fetch_entity_metadata_translation:
         attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
 
         # ensure correct object type map attribute value type to requested type
+        # if self.common_attribute == 'taxon':
+        #     n = self.object_type_mapping(attribute_value)
+        #     print('hi')
         return self.object_type_mapping(attribute_value)
 
     def object_type_mapping(self, attribute_value):
@@ -143,6 +146,21 @@ class fetch_entity_metadata_translation:
                     return text
                 else:
                     return None
+            elif isinstance(attribute_value, list):
+                if len(attribute_value) == 0:
+                    return None
+                elif len(attribute_value) == 1:
+                    if cdm_required_type == 'string':
+                        return str(attribute_value[0])
+                    elif cdm_required_type == 'string':
+                        return int(attribute_value[0])
+                    else:
+                        error_raise = True
+                else:
+                    error_raise = True
+            else:
+                error_raise = True
+
 
         elif cdm_required_type == 'array':
             if attribute_value == None:
