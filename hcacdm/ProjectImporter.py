@@ -12,7 +12,6 @@ __license__ = "Apache 2.0"
 __date__ = "30/08/2019"
 
 from hca.dss import DSSClient
-from ingest.api.ingestapi import IngestApi
 from hcacdm import aux_func as aux_func
 from hcacdm.convert_entity import fetch_entity_metadata_translation
 from hcacdm.make_objects import json_to_objects
@@ -22,6 +21,8 @@ import json
 import datetime
 import urllib
 import os
+from ingest.api.ingestapi import IngestApi
+import sys
 
 
 NoneType = type(None)
@@ -66,6 +67,10 @@ def get_dss_generator(hca_project_uuid):
     return (bundle_generator, total_hits)
 
 def get_hca_entity_types(ingest_api_url="http://api.ingest.data.humancellatlas.org"):
+    '''
+    takes a while to run so only run once per ingest.
+    '''
+
     ingest_api = IngestApi(url=ingest_api_url)
     res = ingest_api.get_schemas(high_level_entity="type", latest_only=True)
     hca_schemas = {}
@@ -77,19 +82,6 @@ def get_hca_entity_types(ingest_api_url="http://api.ingest.data.humancellatlas.o
         else:
             hca_schemas[domainEntity].append(concreteEntity + '_json')
     return hca_schemas
-
-def check_bundle_assumptions(hca_schemas, metadata_files):
-    # Atlas cannot handle multi entities in either duplicated non branched DAG or DAG bubbles
-    assert 'biomaterial' in hca_schemas, 'HCA no longer have biomaterial schemas!'
-    assert len(metadata_files.get('links_json', [])) == 1, 'More than one links.json file in bundle'
-    assert len(metadata_files.get('project_json', [])) == 1, 'More than one project.json file in bundle'
-    for biomaterial_type_entity in hca_schemas.get('biomaterial'):  # todo add support for multiple chained entities
-        assert len(metadata_files.get(biomaterial_type_entity,
-                                      [])) <= 1, 'More than one {} in dataset! Atlas cannot handle this at this time.'.format(
-            biomaterial_type_entity)
-    assert 1 <= len(metadata_files.get('sequence_file_json', [])) <= 3, 'Wrong number of sequencing files.'
-
-    # todo add checks for assay type assumptions to flag technologies that aren't supported
 
 def get_metadata_files_by_uuid(metadata_files):
     # lookup by uuid is frequently used
@@ -146,6 +138,7 @@ def convert(hca_project_uuid, translation_config_file):
     translation_config = json.load(json_config)
 
     res, total_hits = get_dss_generator(hca_project_uuid)
+    logger.info('Response found {} bundles in project.'.format(total_hits))
     hca_entities = get_hca_entity_types()
     project_translated_output = defaultdict(list)
     detected_protocols = []
@@ -157,14 +150,16 @@ def convert(hca_project_uuid, translation_config_file):
     for bundle in res:
 
         # initialize bundle
-
         bundle_graph = aux_func.bundle_info(bundle)
         metadata_files = bundle.get('metadata').get('files')
         metadata_files_by_uuid = get_metadata_files_by_uuid(metadata_files)
-        # check_bundle_assumptions(hca_schemas, metadata_files) # todo turn on after testing
-
         bundle_links = defaultdict(list)
         translated_bundle_metadata = defaultdict(list)
+
+        # check bundle assumptions
+        bundle_assumption_warnings = aux_func.check_bundle_assumptions(bundle, bundle_graph).bundle_assumption_warnings
+        for error_message in bundle_assumption_warnings:
+            logger.warning(error_message)
 
         # get metadata for a bundle
 
