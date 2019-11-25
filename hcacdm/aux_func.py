@@ -4,10 +4,9 @@ __date__ = "30/08/2019"
 
 import networkx as nx
 import json
-import logging
 import os
 from datetime import datetime
-import sys
+import logging
 
 
 class bundle_info:

@@ -114,15 +114,15 @@ class fetch_entity_metadata_translation:
         error_raise = False
         cdm_required_type = self.t.get('type')
         allowed_cdm_required_types = ['string', 'array', 'attribute', 'integer','object']  # allowed values in config types
-        allowed_cdm_required_array_types = ['publication', 'contact', 'data_file','string']  # allowed values in config item
+        allowed_cdm_required_array_types = ['publication', 'contact', 'data_file','string', 'attribute']  # allowed values in config item
 
         assert cdm_required_type in allowed_cdm_required_types, 'Unrecognised type "{}" in config. See entity {}.{}'.format(cdm_required_type, self.common_entity_type, self.common_attribute)  # assertions just warn about new types
         if cdm_required_type == 'array':
             assert self.t.get('items'), 'Config with array type requires "item" entry. See {}.{}'.format(
                 self.common_entity_type, self.common_attribute)
             array_item_type = self.t.get('items')
-            assert array_item_type in allowed_cdm_required_array_types, 'Unrecognised item "{}" in config. See entity {}.{}'.format(
-                self.array_item_type, self.common_entity_type, self.common_attribute)  # assertions just warn about new type
+            if array_item_type not in allowed_cdm_required_array_types:
+                raise AttributeError('Unrecognised item {} in config. See entity {}.{}'.format(array_item_type, self.common_entity_type, self.common_attribute))  # assertions just warn about new type
         else:
             array_item_type = None
 
