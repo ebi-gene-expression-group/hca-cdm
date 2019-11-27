@@ -10,8 +10,10 @@ __date__ = "30/08/2019"
 
 from collections import OrderedDict
 import sys
+from hcacdm import aux_func as aux_func
 
-# todo maybe add one formatter func to remove [] and underscores?
+logger = aux_func.get_logger(__name__)
+
 
 class fetch_entity_metadata_translation:
     '''
@@ -102,9 +104,6 @@ class fetch_entity_metadata_translation:
         attribute_value = getattr(fetch_entity_metadata_translation, self.import_method)(self)
 
         # ensure correct object type map attribute value type to requested type
-        # if self.common_attribute == 'taxon':
-        #     n = self.object_type_mapping(attribute_value)
-        #     print('hi')
         return self.object_type_mapping(attribute_value)
 
     def object_type_mapping(self, attribute_value):
@@ -115,15 +114,15 @@ class fetch_entity_metadata_translation:
         error_raise = False
         cdm_required_type = self.t.get('type')
         allowed_cdm_required_types = ['string', 'array', 'attribute', 'integer','object']  # allowed values in config types
-        allowed_cdm_required_array_types = ['publication', 'contact', 'data_file','string']  # allowed values in config item
+        allowed_cdm_required_array_types = ['publication', 'contact', 'data_file','string', 'attribute']  # allowed values in config item
 
         assert cdm_required_type in allowed_cdm_required_types, 'Unrecognised type "{}" in config. See entity {}.{}'.format(cdm_required_type, self.common_entity_type, self.common_attribute)  # assertions just warn about new types
         if cdm_required_type == 'array':
             assert self.t.get('items'), 'Config with array type requires "item" entry. See {}.{}'.format(
                 self.common_entity_type, self.common_attribute)
             array_item_type = self.t.get('items')
-            assert array_item_type in allowed_cdm_required_array_types, 'Unrecognised item "{}" in config. See entity {}.{}'.format(
-                self.array_item_type, self.common_entity_type, self.common_attribute)  # assertions just warn about new type
+            if array_item_type not in allowed_cdm_required_array_types:
+                raise AttributeError('Unrecognised item {} in config. See entity {}.{}'.format(array_item_type, self.common_entity_type, self.common_attribute))  # assertions just warn about new type
         else:
             array_item_type = None
 
@@ -175,6 +174,11 @@ class fetch_entity_metadata_translation:
                     return (attribute_value)
                 else:
                     error_raise = True
+            elif array_item_type == 'attribute':
+                if isinstance(attribute_value, (str)):
+                    return [{'value': attribute_value}]
+                else:
+                    error_raise = True
             else:
                 error_raise = True
 
@@ -198,6 +202,7 @@ class fetch_entity_metadata_translation:
         # todo deal with lists of ontologies
 
         if error_raise:
+            logger.critical('Missing logic for object typing {}.{}'.format(self.common_entity_type, self.common_attribute))
             raise AttributeError('Missing logic for object typing. \n'
                                 '{}.{}\n'
                                 'Value: {}\n'
@@ -361,9 +366,7 @@ class fetch_entity_metadata_translation:
                 elif isinstance(entry, (int, str)):
                     condensed_value.append(entry)
                 else:
-                    # raise Exception('Data type not yet supported at this level. Update the parser to include {}'.format(
-                    #     type(entry)))
-                    # todo change this exception to a warning in logs
+                    logger.warn('Data type not yet supported at this level. Update the parser to include {}'.format(type(entry)))
                     condensed_value = None
 
             return condensed_value
@@ -409,8 +412,10 @@ class fetch_entity_metadata_translation:
                                 if isinstance(low_level_value, (dict, list)) == False:
                                     entity_extra_attributes[entity_type_count + '.' + top_level_attribute + '.' + mid_level_attribute + '.' + low_level_attribute] = low_level_value
                                 else:
+                                    logger.critical('4th level nesting detected but not expected. See {}'.format(top_level_attribute + '.' + mid_level_attribute + '.' + low_level_attribute))
                                     raise Exception('4th level nesting detected but not expected. See {}'.format(top_level_attribute + '.' + mid_level_attribute + '.' + low_level_attribute))
                         else:
+                            logger.critical('Value type {} not supported'.format(type(mid_level_value)))
                             raise Exception('Value type {} not supported'.format(type(mid_level_value)))
                 else:
                     assert isinstance(top_level_value, list)
@@ -463,6 +468,7 @@ class fetch_entity_metadata_translation:
                 elif condensed_extra_attributes.get(stripped_name + '.text', None):
                     condensed_attribute = stripped_name + '.text'
                 else:
+                    logger.critical('Cannot find attribute called {} to add {} to.'.format(stripped_name, sub_attribute_name))
                     raise ValueError('Cannot find attribute called {} to add {} to.'.format(stripped_name, sub_attribute_name))
 
                 if info_key == 'term_accession' and mode == 'ontology':
@@ -486,6 +492,7 @@ class fetch_entity_metadata_translation:
                     else:
                         condensed_extra_attributes[condensed_attribute]['unit'] = {'unit_type':sub_attribute_value}
                 else:
+                    logger.critical('Cannot place value {} because {} is not defined in code.'.format(sub_attribute_value, info_key))
                     raise ValueError('Cannot place value {} because {} is not defined in code.'.format(sub_attribute_value, info_key))
 
         sub_attribute_lookup(ontology_attributes, ontology_endings, 'ontology')

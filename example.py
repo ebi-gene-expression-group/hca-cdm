@@ -9,8 +9,8 @@ __date__ = "20/09/2019"
 
 from hcacdm.ProjectImporter import convert
 
-translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
-# translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/mg-downloader_fields/datamodel/config/datamodel_mapping_config.json'
+# translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
+translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/mg-ExperimentalFactor/datamodel/config/datamodel_mapping_config.json'
 
 # HCA projects manually discovered September 2019
 
