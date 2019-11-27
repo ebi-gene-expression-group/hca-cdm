@@ -35,7 +35,7 @@ Config allows:
 - handling nested entities
 - adding links via entity alias
 
-Each Atlas attribute is nested under it's respective entity type. Each attribute has entiries for their respective mapping source. Currently ae (aka Array Express) and hca (aka Human Cell Atlas DCP) are currently supported. Under the 'hca' label each attribute has several elements described below.
+Each Atlas attribute is nested under it's respective entity type. Each attribute has entiries for their respective mapping source. Currently ae (aka Array Express) and hca (aka Human Cell Atlas DCP) are supported. Under the 'hca' label each attribute has several elements described below.
 
 An example of one attribute's mapping in the config 
 ```
