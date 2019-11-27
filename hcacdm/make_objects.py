@@ -19,6 +19,7 @@ from datamodel.components import Attribute, Unit
 from datamodel.data import AssayData
 import re
 from collections import defaultdict
+import sys
 
 class json_to_objects:
 
@@ -79,6 +80,7 @@ class json_to_objects:
 
     def sub_object_handler(self, entity, common_entity_type):
         # Attributes and Units are objects in the common data model that are nested in entries. These are created from dict here.
+        error_raise = False
 
         for attribute_name, attribute_value in entity.items():
             # init
@@ -99,6 +101,15 @@ class json_to_objects:
                     entity[attribute_name] = Attribute(**attribute_value)
             elif cdm_required_type =='attribute':
                 entity[attribute_name] = Attribute(**attribute_value)
+
+            elif cdm_required_type =='array':
+                # some sub entities are made by cdm func as default if nested dict is passed e.g. contacts some are not. This is an inconsistency in the cdm code.
+                # todo remove this catch (cdm_required_type =='array' loop) when the inconsistency is fixed.
+                if cdm_required_nested_type == 'attribute':
+                    obj_array = []
+                    for obj in attribute_value:
+                        obj_array.append(Attribute(**obj))
+                    entity[attribute_name] = obj_array
         return entity
 
 
@@ -112,8 +123,8 @@ class json_to_objects:
 
             for entity in entities:
                 self.validate_json_type_vs_config(entity, common_entity_type) # ensure value is correct type
-                entity = self.sub_object_handler(entity, common_entity_type) # create sub nested objects
-                submission[common_entity_type].append(self.object_mapping.get(common_entity_type)(**entity))
+                entity_ = self.sub_object_handler(entity, common_entity_type) # create sub nested objects
+                submission[common_entity_type].append(self.object_mapping.get(common_entity_type)(**entity_))
 
         # make the submission object
 
@@ -127,5 +138,3 @@ class json_to_objects:
         submission['analysis'] = [] # hca import contain no analysis but this is a required field
 
         self.submission_object = Submission(**submission)
-
-# todo sample.attribute needs special type handling as rule is not described in config. Sample attributes are a dictionary with the categories as keys and Attributes as values

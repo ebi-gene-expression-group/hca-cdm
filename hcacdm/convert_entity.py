@@ -174,6 +174,11 @@ class fetch_entity_metadata_translation:
                     return (attribute_value)
                 else:
                     error_raise = True
+            elif array_item_type == 'attribute':
+                if isinstance(attribute_value, (str)):
+                    return [{'value': attribute_value}]
+                else:
+                    error_raise = True
             else:
                 error_raise = True
 
