@@ -350,9 +350,10 @@ class fetch_entity_metadata_translation:
         '''
         Extract extra attributes not captured by common data model schema.
         Look at biomaterials in order of sequence in the graph.
+        This field is unique so unfortunately requires lots of bespoke handling.
+        Note: translation for this method is used to translate keys rather than values.
         todo ignore fields that have already been added to the model for the last entity. Not just a blanket skip first entity!!
-        todo this counter may need some refactoring when the design is complete. This is to protect against replacing keys of the same attribute in the column headers of the sdrf. This needs testing with real data.
-        todo make dict to suite Attribute class.
+        todo translate keys if only 1 is present
         '''
 
         def list_handler(in_list):
@@ -498,7 +499,31 @@ class fetch_entity_metadata_translation:
         sub_attribute_lookup(ontology_attributes, ontology_endings, 'ontology')
         sub_attribute_lookup(unit_attributes, unit_endings, 'unit')
 
-        return condensed_extra_attributes
+
+        '''
+        If only 1 HCA entity type is present in the sample, translate keys & value as per config
+        '''
+        translated_condensed_extra_attributes = OrderedDict()
+
+        for original_attribute, value in condensed_extra_attributes.items():
+            if original_attribute in self.import_translation:
+                assert '_1.' in original_attribute, 'Translation in this method should only be used for keys containing counter e.g. "_1.". Adjust config.'
+                new_key = self.import_translation.get(original_attribute).get('new key')
+
+                value_translation = self.import_translation.get(original_attribute).get('value translation', None)
+                if value_translation:
+                    if str(value.get('value')) in value_translation:
+                        value['value'] = value_translation.get(str(value.get('value')))
+
+                assert new_key, 'Missing "new key" field in config for {}'.format(original_attribute)
+                if original_attribute.replace('_1.', '_2.') in condensed_extra_attributes:
+                    translated_condensed_extra_attributes[original_attribute] = value # don't replace if there are multiple entities of the same name.
+                else:
+                    translated_condensed_extra_attributes[new_key] = value
+            else:
+                translated_condensed_extra_attributes[original_attribute] = value
+
+        return translated_condensed_extra_attributes
 
     # Assay Data Methods
 
