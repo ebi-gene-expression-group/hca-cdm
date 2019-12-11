@@ -22,6 +22,7 @@ import datetime
 import urllib
 import os
 from ingest.api.ingestapi import IngestApi
+import copy
 import sys
 
 
@@ -115,7 +116,7 @@ def get_entity_granularity(common_entity_type):
                  'publication': 'skip',
                  'contact': 'skip',
                  'sample': 'one_entity_per_hca_assay',
-                 'assay_data': 'one_entity_per_hca_assay',
+                 'assay_data': 'one_per_run',
                  'singlecell_assay': 'one_entity_per_hca_assay',
                  'analysis': 'skip',
                  'microarray_assay': 'skip',
@@ -126,6 +127,7 @@ def get_entity_granularity(common_entity_type):
                  'unit': 'skip'}
     assert common_entity_type in granularity, "{} is an unrecognised entity type. Add to the granularity dict in code.".format(common_entity_type)
     return granularity.get(common_entity_type)
+
 
 def convert(hca_project_uuid, translation_config_file):
 
@@ -213,6 +215,43 @@ def convert(hca_project_uuid, translation_config_file):
                         common_modelling = fetch_entity_metadata_translation(translation_params, protocol_uuid)
                         translated_entity_metadata = common_modelling.translated_entity_metadata
                         translated_bundle_metadata['protocol'].append(translated_entity_metadata)
+
+            elif entity_granularity == 'one_per_run':
+                '''
+                WARNING This implementation will change DCP side.
+                This is temp implementation.
+                Hardcoded assumptions made right now for temp fix.
+                Implemented because technical replicates need to be in separate assay data objects.
+                This makes one assay_data object per run_index.
+                It relies on the run_index being unique per bundle (process_id).
+                '''
+
+                assert common_entity_type == 'assay_data', 'This handling is only for assay_data object'
+                common_modelling = fetch_entity_metadata_translation(translation_params)
+                seq_files = bundle.get('metadata').get('files').get('sequence_file_json')
+                assert len(seq_files) > 0, 'No sequencing files in bundle {}'.format(bundle.get('bundle_fqid'))
+                lane_file_mapping = defaultdict(list)
+                # lane_adjusted_naming = defaultdict(str)
+                for x in seq_files:
+                    file_name = x.get('file_core').get('file_name') # WARNING hardcoded
+                    lane_index = x.get('lane_index') # WARNING hardcoded
+                    lane_file_mapping[lane_index].append(file_name)
+                    # lane_adjusted_naming[file_name] = str(file_name) + '_' + str(lane_index)
+
+                seq_files_in_bundle = {x.get('name'): x for x in common_modelling.translated_entity_metadata.get('files')}
+                # if len(lane_file_mapping) > 1:
+                #     for k, v in seq_files_in_bundle.items():
+                #         v['name'] = lane_adjusted_naming.get(k)
+                #         seq_files_in_bundle[k] = v
+
+                for lane, run_grouped_files in lane_file_mapping.items():
+                    lane_translated_entity_metadata = copy.deepcopy(common_modelling.translated_entity_metadata)
+                    lane_translated_entity_metadata['files'] = [seq_files_in_bundle.get(a) for a in run_grouped_files]
+                    lane_translated_entity_metadata['alias'] = str(lane_translated_entity_metadata.get('alias')) + '_' + str(lane_index)
+                    translated_bundle_metadata[common_entity_type].append(lane_translated_entity_metadata)
+
+                    alias = lane_translated_entity_metadata.get('alias')
+                    bundle_links[common_entity_type] += [alias]
 
             elif entity_granularity == 'skip':
                 # nested entities are handled at the higher level when called by the config

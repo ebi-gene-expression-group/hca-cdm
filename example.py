@@ -10,11 +10,11 @@ __date__ = "20/09/2019"
 from hcacdm.ProjectImporter import convert
 
 # translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/master/datamodel/config/datamodel_mapping_config.json'
-translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/mg-ExperimentalFactor/datamodel/config/datamodel_mapping_config.json'
+translation_config_file = 'https://raw.githubusercontent.com/ebi-gene-expression-group/common-datamodel/mg-scisolation/datamodel/config/datamodel_mapping_config.json'
 
 # HCA projects manually discovered September 2019
 
-hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on this dataset
+# hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on this dataset
 # hca_project_uuid = '008e40e8-66ae-43bb-951c-c073a2fa6774' # No error
 # hca_project_uuid = 'abe1a013-af7a-45ed-8c26-f3793c24a1f4' # No error
 # hca_project_uuid = 'c4077b3c-5c98-4d26-a614-246d12c2e5d7' # No error
@@ -36,6 +36,15 @@ hca_project_uuid = 'cc95ff89-2e68-4a08-a234-480eca21ce79' # WORKING developed on
 # hca_project_uuid = 'f83165c5-e2ea-4d15-a5cf-33f3550bffde' # No error
 # hca_project_uuid = 'a29952d9-925e-40f4-8a1c-274f118f1f51' # hca.util.exceptions.SwaggerAPIException: None: None (HTTP 502). Details: {"message": "Internal server error"}
 # hca_project_uuid = 'f8aa201c-4ff1-45a4-890e-840d63459ca2' # AssertionError: This method expects 1 file per bundle. Detected mutiple singlecell_assay entities in bundle ff87cae7-75ec-403d-b505-ae6d816ba424
+
+# hca_project_uuid = '9c20a245-f2c0-43ae-82c9-2232ec6b594f'
+# hca_project_uuid = '4d6f6c96-2a83-43d8-8fe1-0f53bffd4674' # fail
+# hca_project_uuid = '577c946d-6de5-4b55-a854-cd3fde40bff2' # AttributeError: Missing logic for object typing. project.authors
+
+# hca_project_uuid = '88ec040b-8705-4f77-8f41-f81e57632f7d' # 12 file warning & massive project. Lane index does not differentiate files. Cannot convert until this is fixed.
+# hca_project_uuid = '4e6f083b-5b9a-4393-9890-2a83da8188f1' # 2, 16, 32 files in bundle warn (may be corrupt). Lane index does not differentiate files. Cannot convert until this is fixed.
+hca_project_uuid = '116965f3-f094-4769-9d28-ae675c1b569c' # 12 files in bundle warn
+
 
 
 # How to run the convert function
