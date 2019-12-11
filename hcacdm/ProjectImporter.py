@@ -247,7 +247,7 @@ def convert(hca_project_uuid, translation_config_file):
                 for lane, run_grouped_files in lane_file_mapping.items():
                     lane_translated_entity_metadata = copy.deepcopy(common_modelling.translated_entity_metadata)
                     lane_translated_entity_metadata['files'] = [seq_files_in_bundle.get(a) for a in run_grouped_files]
-                    lane_translated_entity_metadata['alias'] = str(lane_translated_entity_metadata.get('alias')) + '_' + str(lane_index)
+                    lane_translated_entity_metadata['alias'] = str(lane_translated_entity_metadata.get('alias')) + '_' + str(lane)
                     translated_bundle_metadata[common_entity_type].append(lane_translated_entity_metadata)
 
                     alias = lane_translated_entity_metadata.get('alias')
