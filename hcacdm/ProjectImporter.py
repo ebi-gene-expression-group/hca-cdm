@@ -238,6 +238,7 @@ def convert(hca_project_uuid, translation_config_file):
                     lane_file_mapping[lane_index].append(file_name)
                 assert len(lane_file_mapping) == 1 or 'MISSING' not in list(lane_file_mapping.keys()), 'Technical replicates detected but lane_index is not provided to diccern runs.'
 
+
                 seq_files_in_bundle = {x.get('name'): x for x in common_modelling.translated_entity_metadata.get('files')}
 
                 for lane, run_grouped_files in lane_file_mapping.items():
