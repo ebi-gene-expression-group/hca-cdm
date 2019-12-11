@@ -230,19 +230,15 @@ def convert(hca_project_uuid, translation_config_file):
                 common_modelling = fetch_entity_metadata_translation(translation_params)
                 seq_files = bundle.get('metadata').get('files').get('sequence_file_json')
                 assert len(seq_files) > 0, 'No sequencing files in bundle {}'.format(bundle.get('bundle_fqid'))
+
                 lane_file_mapping = defaultdict(list)
-                # lane_adjusted_naming = defaultdict(str)
                 for x in seq_files:
                     file_name = x.get('file_core').get('file_name') # WARNING hardcoded
-                    lane_index = x.get('lane_index') # WARNING hardcoded
+                    lane_index = x.get('lane_index', 'MISSING') # WARNING hardcoded
                     lane_file_mapping[lane_index].append(file_name)
-                    # lane_adjusted_naming[file_name] = str(file_name) + '_' + str(lane_index)
+                assert len(lane_file_mapping) == 1 or 'MISSING' not in list(lane_file_mapping.keys()), 'Technical replicates detected but lane_index is not provided to diccern runs.'
 
                 seq_files_in_bundle = {x.get('name'): x for x in common_modelling.translated_entity_metadata.get('files')}
-                # if len(lane_file_mapping) > 1:
-                #     for k, v in seq_files_in_bundle.items():
-                #         v['name'] = lane_adjusted_naming.get(k)
-                #         seq_files_in_bundle[k] = v
 
                 for lane, run_grouped_files in lane_file_mapping.items():
                     lane_translated_entity_metadata = copy.deepcopy(common_modelling.translated_entity_metadata)
