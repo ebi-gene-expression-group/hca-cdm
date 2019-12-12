@@ -151,8 +151,11 @@ class fetch_entity_metadata_translation:
                 elif len(attribute_value) == 1:
                     if cdm_required_type == 'string':
                         return str(attribute_value[0])
-                    elif cdm_required_type == 'string':
-                        return int(attribute_value[0])
+                    else:
+                        error_raise = True
+                elif len(attribute_value) > 1:
+                    if cdm_required_type == 'string':
+                        return ' & '.join(attribute_value)
                     else:
                         error_raise = True
                 else:
