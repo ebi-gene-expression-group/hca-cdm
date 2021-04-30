@@ -49,7 +49,7 @@ s3transfer==0.2.1
 six==1.12.0
 tenacity==5.0.4
 tweak==1.0.3
-urllib3==1.25.6
+urllib3==1.25.8
 XlsxWriter==1.2.1
 git+https://github.com/ebi-gene-expression-group/common-datamodel
 git+https://github.com/ebi-gene-expression-group/hca-cdm
